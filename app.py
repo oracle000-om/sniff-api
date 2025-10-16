@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import UploadFile, File
+from models.detection import PetDetector
+import uuid
+from pathlib import Path
 
 app = FastAPI(
     title="Sniff API",
@@ -31,6 +35,37 @@ def root():
 def health():
     """Health check endpoint - used by monitoring tools"""
     return {"status": "healthy"}
+
+
+# Initialize detector
+detector = PetDetector()
+
+
+@app.post("/api/v1/detect")
+async def detect_pet(image: UploadFile = File(...)):
+    """
+    Detect pets in uploaded image
+
+    Returns detection results with bounding boxes
+    """
+    # Save uploaded file temporarily
+    temp_dir = Path("data/temp")
+    temp_dir.mkdir(exist_ok=True)
+
+    file_id = str(uuid.uuid4())
+    temp_path = temp_dir / f"{file_id}_{image.filename}"
+
+    with open(temp_path, "wb") as f:
+        content = await image.read()
+        f.write(content)
+
+    # Run detection
+    detections, _ = detector.detect_and_crop(str(temp_path))
+
+    # Clean up temp file
+    temp_path.unlink()
+
+    return {"detection_id": file_id, "detections": detections, "count": len(detections)}
 
 
 # Future endpoints will go here:
