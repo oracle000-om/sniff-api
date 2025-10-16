@@ -1,3 +1,6 @@
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from starlette.requests import Request
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import UploadFile, File
@@ -11,6 +14,8 @@ app = FastAPI(
     version="1.0.0-mvp",
 )
 
+templates = Jinja2Templates(directory="templates")
+
 # CORS middleware - allows requests from different origins (ports)
 app.add_middleware(
     CORSMiddleware,
@@ -21,14 +26,10 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-def root():
-    return {
-        "status": "ok",
-        "message": "Sniff API is ALIVE!",  # Changed this
-        "version": "1.0.0-mvp",
-        "docs": "/docs",
-    }
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    """Serve the UI"""
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/health")

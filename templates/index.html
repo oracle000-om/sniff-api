@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sniff API - Pet Reunification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: #f5f7ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .results {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .match {
+            background: #f5f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .pet-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .similarity {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .match-details {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .stats {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🐾 Sniff API</h1>
+            <p class="tagline">Open-source pet reunification through computer vision</p>
+        </header>
+
+        <div class="cards">
+            <!-- Register Card -->
+            <div class="card">
+                <h2>Register a Pet</h2>
+                <div class="upload-area" id="registerUpload" onclick="document.getElementById('registerFile').click()">
+                    <p>📸 Click or drag to upload image</p>
+                    <input type="file" id="registerFile" accept="image/*">
+                </div>
+                <img id="registerPreview" class="preview">
+
+                <input type="text" id="petName" placeholder="Pet Name">
+                <input type="text" id="species" placeholder="Species (dog/cat)">
+                <input type="text" id="shelterId" placeholder="Shelter ID">
+                <textarea id="notes" placeholder="Notes (optional)" rows="3"></textarea>
+
+                <button id="registerBtn" onclick="registerPet()">Register Pet</button>
+
+                <div class="loading" id="registerLoading">
+                    <div class="spinner"></div>
+                    <p>Registering...</p>
+                </div>
+
+                <div class="success" id="registerSuccess"></div>
+                <div class="error" id="registerError"></div>
+            </div>
+
+            <!-- Match Card -->
+            <div class="card">
+                <h2>Find Matches</h2>
+                <div class="upload-area" id="matchUpload" onclick="document.getElementById('matchFile').click()">
+                    <p>📸 Click or drag to upload image</p>
+                    <input type="file" id="matchFile" accept="image/*">
+                </div>
+                <img id="matchPreview" class="preview">
+
+                <button id="matchBtn" onclick="matchPet()">Search for Matches</button>
+
+                <div class="loading" id="matchLoading">
+                    <div class="spinner"></div>
+                    <p>Searching...</p>
+                </div>
+
+                <div class="results" id="matchResults"></div>
+                <div class="error" id="matchError"></div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-number" id="totalPets">-</div>
+            <div class="stat-label">Pets Registered</div>
+        </div>
+    </div>
+
+    <script>
+        // Load stats on page load
+        loadStats();
+
+        // File upload handlers
+        document.getElementById('registerFile').addEventListener('change', function (e) {
+            previewImage(e.target.files[0], 'registerPreview');
+        });
+
+        document.getElementById('matchFile').addEventListener('change', function (e) {
+            previewImage(e.target.files[0], 'matchPreview');
+        });
+
+        // Drag and drop
+        ['registerUpload', 'matchUpload'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                el.classList.add('dragover');
+            });
+            el.addEventListener('dragleave', () => {
+                el.classList.remove('dragover');
+            });
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                el.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                const fileInput = id === 'registerUpload' ? 'registerFile' : 'matchFile';
+                const preview = id === 'registerUpload' ? 'registerPreview' : 'matchPreview';
+                document.getElementById(fileInput).files = e.dataTransfer.files;
+                previewImage(file, preview);
+            });
+        });
+
+        function previewImage(file, previewId) {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function registerPet() {
+            const file = document.getElementById('registerFile').files[0];
+            if (!file) {
+                showError('registerError', 'Please select an image');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('pet_name', document.getElementById('petName').value || 'Unknown');
+            formData.append('species', document.getElementById('species').value || 'unknown');
+            formData.append('shelter_id', document.getElementById('shelterId').value || 'unknown');
+            formData.append('notes', document.getElementById('notes').value || '');
+
+            showLoading('registerLoading', true);
+            hideMessage('registerSuccess');
+            hideMessage('registerError');
+
+            try {
+                const response = await fetch('/api/v1/register', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showSuccess('registerSuccess', `✅ ${data.pet_name} registered successfully! ID: ${data.pet_id.substring(0, 8)}...`);
+                    loadStats();
+                    // Clear form
+                    document.getElementById('petName').value = '';
+                    document.getElementById('species').value = '';
+                    document.getElementById('shelterId').value = '';
+                    document.getElementById('notes').value = '';
+                } else {
+                    showError('registerError', data.message || 'Registration failed');
+                }
+            } catch (error) {
+                showError('registerError', 'Network error: ' + error.message);
+            } finally {
+                showLoading('registerLoading', false);
+            }
+        }
+
+        async function matchPet() {
+            const file = document.getElementById('matchFile').files[0];
+            if (!file) {
+                showError('matchError', 'Please select an image');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            showLoading('matchLoading', true);
+            hideMessage('matchResults');
+            hideMessage('matchError');
+
+            try {
+                const response = await fetch('/api/v1/match', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayMatches(data.matches);
+                } else {
+                    showError('matchError', data.message || 'Match search failed');
+                }
+            } catch (error) {
+                showError('matchError', 'Network error: ' + error.message);
+            } finally {
+                showLoading('matchLoading', false);
+            }
+        }
+
+        function displayMatches(matches) {
+            const resultsDiv = document.getElementById('matchResults');
+
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No matches found above threshold</p>';
+                resultsDiv.style.display = 'block';
+                return;
+            }
+
+            let html = `<h3 style="margin-bottom: 15px;">Found ${matches.length} match(es):</h3>`;
+
+            matches.forEach((match, i) => {
+                const similarity = (match.similarity_score * 100).toFixed(1);
+                html += `
+                    <div class="match">
+                        <div class="match-header">
+                            <span class="pet-name">${match.pet_name}</span>
+                            <span class="similarity">${similarity}%</span>
+                        </div>
+                        <div class="match-details">
+                            <div>Species: ${match.species}</div>
+                            <div>Shelter: ${match.shelter_id}</div>
+                            ${match.notes ? `<div>Notes: ${match.notes}</div>` : ''}
+                            <div style="color: #999; font-size: 12px; margin-top: 5px;">ID: ${match.pet_id}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/v1/stats');
+                const data = await response.json();
+                document.getElementById('totalPets').textContent = data.total_pets || 0;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        function showLoading(id, show) {
+            document.getElementById(id).style.display = show ? 'block' : 'none';
+        }
+
+        function showSuccess(id, message) {
+            const el = document.getElementById(id);
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        function showError(id, message) {
+            const el = document.getElementById(id);
+            el.textContent = '❌ ' + message;
+            el.style.display = 'block';
+        }
+
+        function hideMessage(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
