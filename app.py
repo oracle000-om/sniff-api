@@ -1,10 +1,11 @@
+from starlette.requests import Request
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from starlette.requests import Request
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import UploadFile, File
 from models.detection import PetDetector
+from models.image_quality import ImageQualityChecker
 import uuid
 from pathlib import Path
 
@@ -72,18 +73,20 @@ async def detect_pet(image: UploadFile = File(...)):
 from models.matching import PetMatcher
 from models.embedding import PetEmbedder
 
-# Initialize (add after detector initialization)
+# Initialize models
+detector = PetDetector()
 embedder = PetEmbedder()
 matcher = PetMatcher(collection_name="sniff_pets")
+quality_checker = ImageQualityChecker()
 
 
 @app.post("/api/v1/register")
 async def register_pet(
     image: UploadFile = File(...),
-    pet_name: str = "Unknown",
-    species: str = "unknown",
-    shelter_id: str = "unknown",
-    notes: str = "",
+    pet_name: str = Form("Unknown"),
+    species: str = Form("unknown"),
+    shelter_id: str = Form("unknown"),
+    notes: str = Form(""),
 ):
     """
     Register a new pet in the database
@@ -102,6 +105,14 @@ async def register_pet(
         f.write(content)
 
     try:
+        # Check image quality
+        quality_result = quality_checker.check_quality(str(temp_path))
+
+        # Store quality warnings (don't block registration)
+        quality_warnings = []
+        if not quality_result["is_good"]:
+            quality_warnings = quality_result["warnings"]
+
         # Detect and crop
         detections, cropped = detector.detect_and_crop(str(temp_path))
 
@@ -142,6 +153,13 @@ async def register_pet(
             "detections": detections[0],
             "confidence": detections[0]["confidence"],
         }
+
+        if multiple_pets_warning:
+            response["warning"] = multiple_pets_warning
+        elif quality_warnings:  # Only show if no multiple pets warning
+            response["warning"] = " ".join(quality_warnings)
+
+        return response
 
         if multiple_pets_warning:
             response["warning"] = multiple_pets_warning

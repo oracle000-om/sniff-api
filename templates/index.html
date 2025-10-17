@@ -437,6 +437,7 @@
             formData.append('species', document.getElementById('species').value || 'unknown');
             formData.append('shelter_id', document.getElementById('shelterId').value || 'unknown');
             formData.append('notes', document.getElementById('notes').value || '');
+            console.log('Pet name value:', document.getElementById('petName').value);
 
             showLoading('registerLoading', true);
             hideMessage('registerSuccess');
