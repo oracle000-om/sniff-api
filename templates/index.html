@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sniff API - Pet Reunification</title>
+    <title>Sniff - Pet Reunification Platform</title>
     <style>
         * {
             margin: 0;
@@ -13,10 +13,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #fef5f1 0%, #fff 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #2d2d2d;
         }
 
         .container {
@@ -26,18 +27,35 @@
 
         header {
             text-align: center;
-            color: white;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
+            padding-top: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .paw-icon {
+            font-size: 60px;
+            line-height: 1;
         }
 
         h1 {
             font-size: 48px;
-            margin-bottom: 10px;
+            font-weight: 700;
+            color: #2d2d2d;
+            letter-spacing: -1px;
         }
 
         .tagline {
             font-size: 18px;
-            opacity: 0.9;
+            color: #666;
+            font-weight: 400;
+            margin-top: 10px;
         }
 
         .cards {
@@ -49,35 +67,50 @@
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 24px;
+            color: #FF9F66;
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 600;
         }
 
         .upload-area {
-            border: 2px dashed #667eea;
-            border-radius: 8px;
-            padding: 40px;
+            border: 2px dashed #FF9F66;
+            border-radius: 16px;
+            padding: 50px 30px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            background: #fff9f5;
         }
 
         .upload-area:hover {
-            background: #f5f7ff;
-            border-color: #764ba2;
+            background: #fff4ed;
+            border-color: #ff8844;
+            transform: scale(1.02);
         }
 
         .upload-area.dragover {
-            background: #e8ebff;
-            border-color: #764ba2;
+            background: #ffebdd;
+            border-color: #ff8844;
+            transform: scale(1.05);
+        }
+
+        .upload-area p {
+            color: #666;
+            font-size: 16px;
         }
 
         input[type="file"] {
@@ -88,122 +121,152 @@
         input[type="number"],
         textarea {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: #fafafa;
         }
 
         input:focus,
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #FF9F66;
+            background: white;
         }
 
         button {
             width: 100%;
-            padding: 14px;
-            background: #667eea;
+            padding: 16px;
+            background: #FF9F66;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(255, 159, 102, 0.3);
         }
 
         button:hover {
-            background: #764ba2;
+            background: #ff8844;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 20px rgba(255, 159, 102, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         button:disabled {
-            background: #ccc;
+            background: #ddd;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .preview {
             max-width: 100%;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-top: 15px;
             display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .results {
-            margin-top: 20px;
+            margin-top: 25px;
             display: none;
         }
 
         .match {
-            background: #f5f7ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
+            background: linear-gradient(135deg, #fff9f5 0%, #fff 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #FF9F66;
+            transition: all 0.3s;
+        }
+
+        .match:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(255, 159, 102, 0.15);
         }
 
         .match-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .pet-name {
             font-weight: 600;
-            font-size: 18px;
-            color: #333;
+            font-size: 20px;
+            color: #2d2d2d;
         }
 
         .similarity {
-            background: #667eea;
+            background: #FF9F66;
             color: white;
-            padding: 4px 12px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 159, 102, 0.3);
         }
 
         .match-details {
             color: #666;
             font-size: 14px;
+            line-height: 1.8;
         }
 
         .success {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
             display: none;
+            border-left: 4px solid #28a745;
+            font-weight: 500;
         }
 
         .error {
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             color: #721c24;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
             display: none;
+            border-left: 4px solid #dc3545;
+            font-weight: 500;
         }
 
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             display: none;
+        }
+
+        .loading p {
+            color: #FF9F66;
+            margin-top: 15px;
+            font-weight: 500;
+            font-size: 15px;
         }
 
         .spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid #FF9F66;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
             margin: 0 auto;
         }
 
@@ -219,21 +282,38 @@
 
         .stats {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             text-align: center;
         }
 
         .stat-number {
-            font-size: 48px;
+            font-size: 56px;
             font-weight: 700;
-            color: #667eea;
+            color: #FF9F66;
+            text-shadow: 0 2px 4px rgba(255, 159, 102, 0.2);
         }
 
         .stat-label {
             color: #666;
-            margin-top: 8px;
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            .card {
+                padding: 25px;
+            }
         }
     </style>
 </head>
@@ -241,8 +321,11 @@
 <body>
     <div class="container">
         <header>
-            <h1>🐾 Sniff API</h1>
-            <p class="tagline">Open-source pet reunification through computer vision</p>
+            <div class="logo">
+                <div class="paw-icon">🐾</div>
+                <h1>Sniff</h1>
+            </div>
+            <p class="tagline">Reuniting pets with their families through compassionate technology</p>
         </header>
 
         <div class="cards">
@@ -264,7 +347,7 @@
 
                 <div class="loading" id="registerLoading">
                     <div class="spinner"></div>
-                    <p>Registering...</p>
+                    <p>Registering your pet...</p>
                 </div>
 
                 <div class="success" id="registerSuccess"></div>
@@ -284,7 +367,7 @@
 
                 <div class="loading" id="matchLoading">
                     <div class="spinner"></div>
-                    <p>Searching...</p>
+                    <p>Searching for your pet...</p>
                 </div>
 
                 <div class="results" id="matchResults"></div>
@@ -299,10 +382,8 @@
     </div>
 
     <script>
-        // Load stats on page load
         loadStats();
 
-        // File upload handlers
         document.getElementById('registerFile').addEventListener('change', function (e) {
             previewImage(e.target.files[0], 'registerPreview');
         });
@@ -311,7 +392,6 @@
             previewImage(e.target.files[0], 'matchPreview');
         });
 
-        // Drag and drop
         ['registerUpload', 'matchUpload'].forEach(id => {
             const el = document.getElementById(id);
             el.addEventListener('dragover', (e) => {
@@ -371,9 +451,12 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    showSuccess('registerSuccess', `✅ ${data.pet_name} registered successfully! ID: ${data.pet_id.substring(0, 8)}...`);
+                    let message = `🎉 Great news! ${data.pet_name} has been registered successfully!`;
+                    if (data.warning) {
+                        message += `\n\n⚠️ ${data.warning}`;
+                    }
+                    showSuccess('registerSuccess', message);
                     loadStats();
-                    // Clear form
                     document.getElementById('petName').value = '';
                     document.getElementById('species').value = '';
                     document.getElementById('shelterId').value = '';
@@ -411,6 +494,10 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
+                    // Show warning if multiple pets detected
+                    if (data.warning) {
+                        showError('matchError', data.warning);
+                    }
                     displayMatches(data.matches);
                 } else {
                     showError('matchError', data.message || 'Match search failed');
@@ -426,29 +513,29 @@
             const resultsDiv = document.getElementById('matchResults');
 
             if (matches.length === 0) {
-                resultsDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No matches found above threshold</p>';
+                resultsDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 30px; font-weight: 500;">No matches found. Try adjusting your search or registering the pet first.</p>';
                 resultsDiv.style.display = 'block';
                 return;
             }
 
-            let html = `<h3 style="margin-bottom: 15px;">Found ${matches.length} match(es):</h3>`;
+            let html = `<h3 style="margin-bottom: 20px; color: #2d2d2d; font-size: 18px;">Found ${matches.length} potential match${matches.length > 1 ? 'es' : ''}:</h3>`;
 
             matches.forEach((match, i) => {
                 const similarity = (match.similarity_score * 100).toFixed(1);
                 html += `
-                    <div class="match">
-                        <div class="match-header">
-                            <span class="pet-name">${match.pet_name}</span>
-                            <span class="similarity">${similarity}%</span>
-                        </div>
-                        <div class="match-details">
-                            <div>Species: ${match.species}</div>
-                            <div>Shelter: ${match.shelter_id}</div>
-                            ${match.notes ? `<div>Notes: ${match.notes}</div>` : ''}
-                            <div style="color: #999; font-size: 12px; margin-top: 5px;">ID: ${match.pet_id}</div>
-                        </div>
+                <div class="match">
+                    <div class="match-header">
+                        <span class="pet-name">${match.pet_name}</span>
+                        <span class="similarity">${similarity}%</span>
                     </div>
-                `;
+                    <div class="match-details">
+                        <div><strong>Species:</strong> ${match.species}</div>
+                        <div><strong>Shelter:</strong> ${match.shelter_id}</div>
+                        ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ''}
+                        <div style="color: #999; font-size: 12px; margin-top: 8px;">ID: ${match.pet_id}</div>
+                    </div>
+                </div>
+            `;
             });
 
             resultsDiv.innerHTML = html;
@@ -471,13 +558,13 @@
 
         function showSuccess(id, message) {
             const el = document.getElementById(id);
-            el.textContent = message;
+            el.innerHTML = message.replace(/\n/g, '<br>');
             el.style.display = 'block';
         }
 
         function showError(id, message) {
             const el = document.getElementById(id);
-            el.textContent = '❌ ' + message;
+            el.textContent = '⚠️ ' + message;
             el.style.display = 'block';
         }
 

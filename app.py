@@ -101,35 +101,59 @@ async def register_pet(
         content = await image.read()
         f.write(content)
 
-    # Detect and crop
-    detections, cropped = detector.detect_and_crop(str(temp_path))
+    try:
+        # Detect and crop
+        detections, cropped = detector.detect_and_crop(str(temp_path))
 
-    if len(cropped) == 0:
+        # Error: No pets detected
+        if len(cropped) == 0:
+            temp_path.unlink()
+            return {
+                "status": "error",
+                "message": "No pets detected in this image. Please upload a clearer photo with the pet clearly visible.",
+            }
+
+        # Warning: Multiple pets detected (use first one)
+        if len(detections) > 1:
+            multiple_pets_warning = f"Multiple pets detected ({len(detections)}). We registered the first one detected. To register the other pet(s), please upload a separate image with just that pet visible."
+        else:
+            multiple_pets_warning = None
+
+        # Generate embedding for first detected pet
+        embedding = embedder.generate_body_embedding(cropped[0])
+
+        # Register in database
+        pet_id = matcher.register_pet(
+            embedding=embedding,
+            pet_name=pet_name,
+            species=species if species != "unknown" else detections[0]["class"],
+            shelter_id=shelter_id,
+            notes=notes,
+        )
+
+        # Clean up temp file
         temp_path.unlink()
-        return {"status": "error", "message": "No pets detected in image"}
 
-    # Generate embedding for first detected pet
-    embedding = embedder.generate_body_embedding(cropped[0])
+        response = {
+            "status": "success",
+            "pet_id": pet_id,
+            "pet_name": pet_name,
+            "species": species if species != "unknown" else detections[0]["class"],
+            "detections": detections[0],
+            "confidence": detections[0]["confidence"],
+        }
 
-    # Register in database
-    pet_id = matcher.register_pet(
-        embedding=embedding,
-        pet_name=pet_name,
-        species=species if species != "unknown" else detections[0]["class"],
-        shelter_id=shelter_id,
-        notes=notes,
-    )
+        if multiple_pets_warning:
+            response["warning"] = multiple_pets_warning
 
-    # Clean up temp file
-    temp_path.unlink()
+        return response
 
-    return {
-        "status": "success",
-        "pet_id": pet_id,
-        "pet_name": pet_name,
-        "species": species,
-        "detections": detections[0],
-    }
+    except Exception as e:
+        # Clean up temp file if it still exists
+        if temp_path.exists():
+            temp_path.unlink()
+
+        return {"status": "error", "message": f"Registration failed: {str(e)}"}
 
 
 @app.post("/api/v1/match")
@@ -152,30 +176,53 @@ async def match_pet(
         content = await image.read()
         f.write(content)
 
-    # Detect and crop
-    detections, cropped = detector.detect_and_crop(str(temp_path))
+    try:
+        # Detect and crop
+        detections, cropped = detector.detect_and_crop(str(temp_path))
 
-    if len(cropped) == 0:
+        # Error: No pets detected
+        if len(cropped) == 0:
+            temp_path.unlink()
+            return {
+                "status": "error",
+                "message": "No pets detected in this image. Please upload a clearer photo with the pet clearly visible.",
+            }
+
+        # Warning: Multiple pets detected
+        if len(detections) > 1:
+            multiple_pets_warning = f"Multiple pets detected ({len(detections)}). We registered the first one detected. To register the other pet(s), please upload a separate image with just that pet visible."
+        else:
+            multiple_pets_warning = None
+
+        # Generate embedding
+        embedding = embedder.generate_body_embedding(cropped[0])
+
+        # Search for matches
+        matches = matcher.search_similar(
+            embedding=embedding, top_k=top_k, threshold=threshold
+        )
+
+        # Clean up temp file
         temp_path.unlink()
-        return {"status": "error", "message": "No pets detected in image"}
 
-    # Generate embedding
-    embedding = embedder.generate_body_embedding(cropped[0])
+        response = {
+            "status": "success",
+            "query_detection": detections[0],
+            "matches": matches,
+            "count": len(matches),
+        }
 
-    # Search for matches
-    matches = matcher.search_similar(
-        embedding=embedding, top_k=top_k, threshold=threshold
-    )
+        if multiple_pets_warning:
+            response["warning"] = multiple_pets_warning
 
-    # Clean up temp file
-    temp_path.unlink()
+        return response
 
-    return {
-        "status": "success",
-        "query_detection": detections[0],
-        "matches": matches,
-        "count": len(matches),
-    }
+    except Exception as e:
+        # Clean up temp file if it still exists
+        if temp_path.exists():
+            temp_path.unlink()
+
+        return {"status": "error", "message": f"Match search failed: {str(e)}"}
 
 
 @app.get("/api/v1/stats")
