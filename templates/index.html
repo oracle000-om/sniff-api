@@ -523,19 +523,40 @@
 
             matches.forEach((match, i) => {
                 const similarity = (match.similarity_score * 100).toFixed(1);
+
+                // Add confidence label
+                let confidenceLabel = '';
+                let confidenceColor = '';
+                if (similarity >= 95) {
+                    confidenceLabel = 'Very Strong Match';
+                    confidenceColor = '#28a745'; // Green
+                } else if (similarity >= 85) {
+                    confidenceLabel = 'Strong Match';
+                    confidenceColor = '#5cb85c'; // Light green
+                } else if (similarity >= 75) {
+                    confidenceLabel = 'Possible Match';
+                    confidenceColor = '#FF9F66'; // Orange
+                } else {
+                    confidenceLabel = 'Weak Match';
+                    confidenceColor = '#dc3545'; // Red
+                }
+
                 html += `
-                <div class="match">
-                    <div class="match-header">
-                        <span class="pet-name">${match.pet_name}</span>
-                        <span class="similarity">${similarity}%</span>
+                    <div class="match">
+                        <div class="match-header">
+                            <span class="pet-name">${match.pet_name}</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="background: ${confidenceColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">${confidenceLabel}</span>
+                                <span class="similarity">${similarity}%</span>
+                            </div>
+                        </div>
+                        <div class="match-details">
+                            <div><strong>Species:</strong> ${match.species}</div>
+                            <div><strong>Shelter:</strong> ${match.shelter_id}</div>
+                            ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ''}
+                            <div style="color: #999; font-size: 12px; margin-top: 8px;">ID: ${match.pet_id}</div>
+                        </div>
                     </div>
-                    <div class="match-details">
-                        <div><strong>Species:</strong> ${match.species}</div>
-                        <div><strong>Shelter:</strong> ${match.shelter_id}</div>
-                        ${match.notes ? `<div><strong>Notes:</strong> ${match.notes}</div>` : ''}
-                        <div style="color: #999; font-size: 12px; margin-top: 8px;">ID: ${match.pet_id}</div>
-                    </div>
-                </div>
             `;
             });
 
