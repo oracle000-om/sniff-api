@@ -593,6 +593,7 @@
     </div>
 
     <script>
+        // Wait for DOM to be fully loaded before attaching event listeners
         document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM loaded - initializing...');
 
@@ -609,7 +610,7 @@
                 });
             }
 
-            const foundFileInput = document.getElementById('matchFile');
+            const foundFileInput = document.getElementById('foundFile');
             console.log('Found input:', foundFileInput);
             if (foundFileInput) {
                 foundFileInput.addEventListener('change', function (e) {
@@ -618,39 +619,8 @@
                 });
             }
 
-
-            // Match file preview
-            const matchFileInput = document.getElementById('matchFile');
-            if (matchFileInput) {
-                matchFileInput.addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    const preview = document.getElementById('matchPreview');
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            preview.src = e.target.result;
-                            preview.style.display = 'block';
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            // Image preview for registration
-            document.getElementById('registerImage').addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        document.getElementById('registerPreviewImg').src = e.target.result;
-                        document.getElementById('registerPreview').style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
             // Drag and drop handlers
-            ['matchUpload'].forEach(id => {  // Removed registerUpload, foundUpload since we don't have those anymore
+            ['registerUpload', 'foundUpload', 'matchUpload'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
 
@@ -667,18 +637,34 @@
                     e.preventDefault();
                     el.classList.remove('dragover');
                     const file = e.dataTransfer.files[0];
+                    let fileInput, preview;
 
-                    // For match upload
-                    const inputEl = document.getElementById('matchFile');
+                    if (id === 'registerUpload') {
+                        fileInput = 'registerFile';
+                        preview = 'registerPreview';
+                    } else if (id === 'foundUpload') {
+                        fileInput = 'foundFile';
+                        preview = 'foundPreview';
+                    } else {
+                        fileInput = 'matchFile';
+                        preview = 'matchPreview';
+                    }
+
+                    const inputEl = document.getElementById(fileInput);
+                    if (inputEl) {
+                        inputEl.files = e.dataTransfer.files;
+                        previewImage(file, preview);
+                    }
+                });
+            });
+
+            // Image preview for match upload
+            const matchFileInput = document.getElementById('matchFile');
+            if (matchFileInput) {
+                matchFileInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
                     const preview = document.getElementById('matchPreview');
-
-                    if (inputEl && file) {
-                        // Create a new FileList with the dropped file
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        inputEl.files = dataTransfer.files;
-
-                        // Show preview
+                    if (file) {
                         const reader = new FileReader();
                         reader.onload = function (e) {
                             preview.src = e.target.result;
@@ -687,8 +673,9 @@
                         reader.readAsDataURL(file);
                     }
                 });
-            });
-        }); // End of DOMContentLoaded
+            }
+        });
+        // End of DOMContentLoaded
 
         // ============ FUNCTION DEFINITIONS ============
 
@@ -773,7 +760,7 @@
         }
 
         async function registerFoundPet() {
-            const file = document.getElementById('matchFile').files[0];
+            const file = document.getElementById('foundFile').files[0];
             if (!file) {
                 showError('foundError', 'Please select an image');
                 return;
@@ -907,8 +894,8 @@
 
             matches.forEach(match => {
                 const confidence = (match.similarity_score * 100).toFixed(1);
-                const matchLevel = confidence > 90 ? 'Strong Match' : confidence > 82 ? 'Good Match' : confidence > 72 ? 'Possible Match' : 'Unlikely Match';
-                const badgeColor = confidence > 90 ? '#28a745' : confidence > 82 ? '#ffc107' : confidence > 72 ? '#ff9800' : '#9e9e9e';
+                const matchLevel = confidence > 85 ? 'Strong Match' : confidence > 70 ? 'Good Match' : 'Possible Match';
+                const badgeColor = confidence > 85 ? '#28a745' : confidence > 70 ? '#ffc107' : '#6c757d';
 
                 html += `
             <div style="border-left: 4px solid #ff6b35; padding: 20px; margin-bottom: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -1060,7 +1047,7 @@
         }
 
         function clearFoundForm() {
-            document.getElementById('matchFile').value = '';
+            document.getElementById('foundFile').value = '';
             document.getElementById('foundPreview').style.display = 'none';
             document.getElementById('foundPetName').value = '';
             document.getElementById('foundSpecies').value = '';

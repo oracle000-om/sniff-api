@@ -4,7 +4,7 @@ Image quality module - checks if images are suitable for pet detection
 
 import cv2
 import numpy as np
-from typing import Dict, Tuple
+from typing import Dict, Any, Tuple
 
 
 class ImageQualityChecker:
@@ -88,61 +88,74 @@ class ImageQualityChecker:
 
         return is_ok, (height, width)
 
-    def check_quality(self, image_path: str) -> Dict:
+    def detect_bars_or_cage(self, image: np.ndarray) -> bool:
         """
-        Comprehensive quality check
-
-        Args:
-            image_path: Path to image file
+        Detect if image has cage bars or fence that might obscure pet
 
         Returns:
-            Dict with quality results and warnings
+            True if bars/cage detected
         """
-        # Read image
-        image = cv2.imread(image_path)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        if image is None:
-            return {
-                "is_good": False,
-                "warnings": ["Could not read image file"],
-                "metrics": {},
-            }
+        # Detect edges
+        edges = cv2.Canny(gray, 50, 150)
 
-        # Run checks
-        brightness_ok, brightness = self.check_brightness(image)
-        sharpness_ok, sharpness = self.check_sharpness(image)
-        resolution_ok, (height, width) = self.check_resolution(image)
+        # Use Hough Line Transform to detect strong vertical/horizontal lines
+        lines = cv2.HoughLinesP(
+            edges, 1, np.pi / 180, threshold=100, minLineLength=50, maxLineGap=10
+        )
 
-        # Collect warnings
+        if lines is None:
+            return False
+
+        # Count strong vertical lines (typical of kennel bars)
+        vertical_lines = 0
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            angle = abs(np.arctan2(y2 - y1, x2 - x1) * 180 / np.pi)
+
+            # Vertical lines (close to 90 degrees)
+            if 80 < angle < 100:
+                vertical_lines += 1
+
+        # If many vertical lines detected, likely a cage
+        return vertical_lines > 5
+
+    def check_quality(self, image_path: str) -> Dict[str, Any]:
+        """Check if image quality is sufficient for matching"""
+        img = cv2.imread(image_path)
+
+        if img is None:
+            return {"is_good": False, "warnings": ["Could not read image"]}
+
         warnings = []
 
-        if not brightness_ok:
-            if brightness < self.min_brightness:
-                warnings.append(
-                    "Image is too dark. Try taking photo in better lighting."
-                )
-            else:
-                warnings.append("Image is overexposed. Try reducing brightness.")
+        # Check blur (Laplacian variance) - LOWERED threshold
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-        if not sharpness_ok:
+        if laplacian_var < 50:  # Changed from 100 - much more lenient
             warnings.append(
                 "Image appears blurry. Hold camera steady or use better focus."
             )
 
-        if not resolution_ok:
-            warnings.append(
-                f"Image resolution is too low ({width}x{height}). Use higher quality camera."
-            )
+        # Check brightness - MORE LENIENT range
+        brightness = np.mean(gray)
 
-        return {
-            "is_good": brightness_ok and sharpness_ok and resolution_ok,
-            "warnings": warnings,
-            "metrics": {
-                "brightness": brightness,
-                "sharpness": sharpness,
-                "resolution": (width, height),
-            },
-        }
+        if brightness < 30:  # Changed from 50 - darker OK
+            warnings.append("Image is very dark. Try better lighting.")
+        elif brightness > 240:  # Changed from 220 - brighter OK
+            warnings.append("Image is overexposed. Reduce brightness.")
+
+        is_good = len(warnings) == 0
+
+        return {"is_good": is_good, "warnings": warnings}
+
+        # Check for cage bars
+        if self.detect_bars_or_cage(img):
+            warnings.append(
+                "Cage or fence bars detected. Please take photo without barriers between camera and pet."
+            )
 
 
 # Test function

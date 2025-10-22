@@ -58,8 +58,17 @@ class PetMatcher:
             FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=2048),
             FieldSchema(name="pet_name", dtype=DataType.VARCHAR, max_length=100),
             FieldSchema(name="species", dtype=DataType.VARCHAR, max_length=20),
+            FieldSchema(
+                name="report_type", dtype=DataType.VARCHAR, max_length=20
+            ),  # "shelter_intake" or "found_pet"
             FieldSchema(name="shelter_id", dtype=DataType.VARCHAR, max_length=100),
+            FieldSchema(name="finder_name", dtype=DataType.VARCHAR, max_length=100),
+            FieldSchema(name="finder_contact", dtype=DataType.VARCHAR, max_length=200),
+            FieldSchema(name="location_found", dtype=DataType.VARCHAR, max_length=200),
+            FieldSchema(name="microchip", dtype=DataType.VARCHAR, max_length=20),
             FieldSchema(name="notes", dtype=DataType.VARCHAR, max_length=500),
+            FieldSchema(name="image_url", dtype=DataType.VARCHAR, max_length=200),
+            FieldSchema(name="claims", dtype=DataType.INT64),
         ]
 
         schema = CollectionSchema(
@@ -83,8 +92,14 @@ class PetMatcher:
         embedding: np.ndarray,
         pet_name: str,
         species: str,
+        report_type: str = "shelter_intake",
         shelter_id: str = "unknown",
+        finder_name: str = "",
+        finder_contact: str = "",
+        location_found: str = "",
+        microchip: str = "",
         notes: str = "",
+        image_url: str = "",
     ) -> str:
         """
         Register a new pet in the database
@@ -93,7 +108,11 @@ class PetMatcher:
             embedding: 2048-d feature vector
             pet_name: Name of the pet
             species: 'dog' or 'cat'
-            shelter_id: Shelter identifier
+            report_type: 'shetler_intake' or 'found_pet'
+            shelter_id: Shelter identifier (for shelter intakes)
+            finder_name: Name of the person who found the pet (for found pets)
+            finder_contact: Contact info of the finder (for found pets)
+            location_found: Location where the pet was found (for found pets)
             notes: Additional notes
 
         Returns:
@@ -107,15 +126,24 @@ class PetMatcher:
             [embedding.tolist()],
             [pet_name],
             [species],
+            [report_type],
             [shelter_id],
+            [finder_name],
+            [finder_contact],
+            [location_found],
+            [microchip],
             [notes],
+            [image_url],
+            [0],
         ]
 
         # Insert into Milvus
         self.collection.insert(data)
         self.collection.flush()
 
-        print(f"Registered pet: {pet_name} ({species}) with ID: {pet_id}")
+        print(
+            f"Registered pet: {pet_name} ({species}) as {report_type} with ID: {pet_id}"
+        )
         return pet_id
 
     def search_similar(
@@ -141,7 +169,18 @@ class PetMatcher:
             anns_field="embedding",
             param=search_params,
             limit=top_k,
-            output_fields=["pet_name", "species", "shelter_id", "notes"],
+            output_fields=[
+                "pet_name",
+                "species",
+                "report_type",
+                "shelter_id",
+                "finder_name",
+                "finder_contact",
+                "location_found",
+                "microchip",
+                "notes",
+                "image_url",
+            ],
         )
 
         # Format results
@@ -157,8 +196,14 @@ class PetMatcher:
                         "similarity_score": similarity,
                         "pet_name": hit.entity.get("pet_name"),
                         "species": hit.entity.get("species"),
+                        "report_type": hit.entity.get("report_type"),
                         "shelter_id": hit.entity.get("shelter_id"),
+                        "finder_name": hit.entity.get("finder_name"),
+                        "finder_contact": hit.entity.get("finder_contact"),
+                        "location_found": hit.entity.get("location_found"),
+                        "microchip": hit.entity.get("microchip"),
                         "notes": hit.entity.get("notes"),
+                        "image_url": hit.entity.get("image_url"),
                     }
                     matches.append(match)
 
