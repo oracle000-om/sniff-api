@@ -2,15 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install ALL system dependencies for OpenCV and ML
+# Install system dependencies for OpenCV and ML (Debian compatible)
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
     cmake \
     wget \
-    libgl1-mesa-glx \
-    libgl1-mesa-dev \
+    libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
@@ -22,15 +21,6 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpng-dev \
     libtiff-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libv4l-dev \
-    libxvidcore-dev \
-    libx264-dev \
-    libgtk-3-dev \
-    libatlas-base-dev \
-    gfortran \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
