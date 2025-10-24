@@ -1,9 +1,41 @@
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Python
 __pycache__/
-*.pyc
-*.db
-milvus_demo.db
-data/images/
-data/claims.json
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
+env/
+*.egg-info/
+
+# Docker volumes & databases
+volumes/
+backups/
+*.db
+*.db-shm
+*.db-wal
+milvus_demo.db
+
+# Migration temp files
+migration_data.json
+
+# Test images - keep local only, don't commit
+data/test_images/
+
+# Analytics
+data/analytics.json
+
+# Environment variables
+.env
+.env.local
+
+# Logs
 *.log
+backup.log

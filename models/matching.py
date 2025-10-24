@@ -29,9 +29,8 @@ class PetMatcher:
 
         # Connect to Milvus Lite (local embedded)
         print("Connecting to Milvus...")
-        connections.connect(
-            alias="default", uri="./milvus_demo.db"  # Local file for Milvus Lite
-        )
+        if not connections.has_connection("default"):
+            connections.connect(alias="default", host="localhost", port="19530")
 
         # Create or load collection
         self._setup_collection()
@@ -58,17 +57,17 @@ class PetMatcher:
             FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=2048),
             FieldSchema(name="pet_name", dtype=DataType.VARCHAR, max_length=100),
             FieldSchema(name="species", dtype=DataType.VARCHAR, max_length=20),
-            FieldSchema(
-                name="report_type", dtype=DataType.VARCHAR, max_length=20
-            ),  # "shelter_intake" or "found_pet"
+            FieldSchema(name="report_type", dtype=DataType.VARCHAR, max_length=20),
             FieldSchema(name="shelter_id", dtype=DataType.VARCHAR, max_length=100),
             FieldSchema(name="finder_name", dtype=DataType.VARCHAR, max_length=100),
             FieldSchema(name="finder_contact", dtype=DataType.VARCHAR, max_length=200),
             FieldSchema(name="location_found", dtype=DataType.VARCHAR, max_length=200),
+            FieldSchema(
+                name="holding_pet", dtype=DataType.VARCHAR, max_length=10
+            ),  # ADD THIS
             FieldSchema(name="microchip", dtype=DataType.VARCHAR, max_length=20),
             FieldSchema(name="notes", dtype=DataType.VARCHAR, max_length=500),
             FieldSchema(name="image_url", dtype=DataType.VARCHAR, max_length=200),
-            FieldSchema(name="claims", dtype=DataType.INT64),
         ]
 
         schema = CollectionSchema(
@@ -97,6 +96,7 @@ class PetMatcher:
         finder_name: str = "",
         finder_contact: str = "",
         location_found: str = "",
+        holding_pet: str = "no",  # AFTER location_found
         microchip: str = "",
         notes: str = "",
         image_url: str = "",
@@ -131,10 +131,10 @@ class PetMatcher:
             [finder_name],
             [finder_contact],
             [location_found],
+            [holding_pet],  # NEW - add here
             [microchip],
             [notes],
             [image_url],
-            [0],
         ]
 
         # Insert into Milvus
@@ -201,7 +201,6 @@ class PetMatcher:
                         "finder_name": hit.entity.get("finder_name"),
                         "finder_contact": hit.entity.get("finder_contact"),
                         "location_found": hit.entity.get("location_found"),
-                        "microchip": hit.entity.get("microchip"),
                         "notes": hit.entity.get("notes"),
                         "image_url": hit.entity.get("image_url"),
                     }
