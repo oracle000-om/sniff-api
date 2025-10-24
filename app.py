@@ -603,8 +603,10 @@ async def claim_pet(request: Request):
 
         # Get client IP and hash it for privacy (GDPR compliant)
         client_ip = request.client.host
-        salt = "sniff_privacy_salt_2025"  # Change to random value in production
-        ip_hash = hashlib.sha256(f"{client_ip}{salt}".encode()).hexdigest()[:16]
+        salt = "ZB5x0Wu2YDI0xj0ESuUeLKR0jHXnlMdQxNbCdTE73GA"
+        ip_hash = hashlib.sha256(f"{client_ip}{salt}".encode()).hexdigest()[
+            :16
+        ]  # ← ADD THIS LINE
 
         # Load claims data
         claims_file = Path("data/claims.json")
