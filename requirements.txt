@@ -1,29 +1,17 @@
-# Web Framework
 fastapi==0.119.0
 uvicorn[standard]==0.37.0
 python-multipart==0.0.20
-
-# Vector Database
 pymilvus==2.6.2
 milvus-lite==2.5.1
-
-# Computer Vision & ML
 opencv-python-headless==4.12.0.88
 torch==2.9.0
 torchvision==0.24.0
 ultralytics==8.3.216
-
-# Face Recognition
 insightface==0.7.3
 scikit-image==0.25.2
 scikit-learn==1.7.2
-
-# Image Processing
 Pillow==12.0.0
 numpy==2.2.6
-
-# Utilities
 requests==2.32.5
 python-dotenv==1.1.1
 pyyaml==6.0.3
-EOF
