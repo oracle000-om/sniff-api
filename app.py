@@ -78,10 +78,21 @@ os.makedirs("data", exist_ok=True)
 # Mount static files
 app.mount("/data", StaticFiles(directory="data"), name="data")
 
-# Connect to Milvus (Docker)
-print("🔌 Connecting to Milvus (Docker)...")
+# Connect to Milvus - use Lite on Railway, Docker locally
+import os
+
+RAILWAY_ENV = os.getenv("RAILWAY_ENVIRONMENT")
+print(f"🔌 Connecting to Milvus ({'Lite' if RAILWAY_ENV else 'Docker'})...")
+
 try:
-    connections.connect(alias="default", host="localhost", port="19530")
+    if RAILWAY_ENV:
+        # Railway: Use Milvus Lite (embedded database)
+        connections.connect(alias="default", uri="./milvus_demo.db")
+    else:
+        # Local: Use Docker Milvus
+        connections.connect(alias="default", host="localhost", port="19530")
+
+    print("✅ Connected to Milvus successfully")
 except Exception as e:
     print(f"❌ Connection error: {e}")
     raise
