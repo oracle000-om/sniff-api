@@ -27,13 +27,9 @@ class DBManager:
 
             # Zilliz Cloud connection (with token)
             if token:
-                connections.connect(
-                    alias="default",
-                    uri=f"https://{host}:{port}",
-                    token=token,
-                    secure=True,
-                )
-                print(f"🔗 Connecting to Zilliz Cloud: {host}")
+                # Serverless uses URI without port
+                connections.connect(alias="default", uri=f"https://{host}", token=token)
+                print(f"🔗 Connecting to Zilliz Serverless: {host}")
             # Local Milvus connection
             else:
                 connections.connect(alias="default", host=host, port=port)
