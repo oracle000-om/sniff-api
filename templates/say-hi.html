@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🐾</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Say Hi - Sniff</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #fef5f1 0%, #fff 100%);
+            min-height: 100vh;
+            padding: clamp(10px, 3vw, 20px);
+            color: #2d2d2d;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: clamp(30px, 5vw, 40px);
+            padding-top: clamp(10px, 3vw, 20px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .paw-icon {
+            font-size: clamp(40px, 8vw, 60px);
+            line-height: 1;
+        }
+
+        h1 {
+            font-size: clamp(32px, 6vw, 48px);
+            font-weight: 700;
+            color: #2d2d2d;
+            letter-spacing: -1px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: clamp(30px, 5vw, 50px);
+            padding: clamp(20px, 5vw, 40px);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero h2 {
+            font-size: clamp(24px, 5vw, 36px);
+            color: #2d2d2d;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: clamp(16px, 3vw, 20px);
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: clamp(20px, 4vw, 35px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            color: #FF9F66;
+            margin-bottom: 15px;
+            font-size: clamp(20px, 4vw, 26px);
+            font-weight: 600;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .checkbox-option {
+            display: block;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .checkbox-option:hover {
+            border-color: #FF9F66;
+            background: #fff9f5;
+        }
+
+        .checkbox-option.selected {
+            border-color: #FF9F66;
+            background: #fff9f5;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #FF9F66;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-title {
+            font-weight: 600;
+            color: #2d2d2d;
+            margin-bottom: 4px;
+        }
+
+        .option-desc {
+            font-size: 13px;
+            color: #999;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: #fafafa;
+            min-height: 48px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #FF9F66;
+            background: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #FF9F66;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(255, 159, 102, 0.3);
+            min-height: 48px;
+        }
+
+        button:hover {
+            background: #ff8844;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 159, 102, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ddd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-github {
+            background: #24292e;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-github:hover {
+            background: #1a1e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(36, 41, 46, 0.3);
+        }
+
+        .feedback-form {
+            display: none;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .feedback-form.active {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            padding: 20px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 2px solid #c3e6cb;
+        }
+
+        .error-message {
+            display: none;
+            padding: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 2px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .hero {
+                padding: 20px 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .checkbox-option {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            body {
+                padding: 8px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .hero {
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="/" class="logo">
+                <div class="paw-icon">🐾</div>
+                <h1>Sniff</h1>
+            </a>
+        </header>
+
+
+
+        <!-- Main Card -->
+        <div class="card">
+            <h3>Hi. What's up?</h3>
+            <p>Pick why you want to reach out :) </p>
+
+            <!-- Feedback Type Selection -->
+            <div style="margin-bottom: 25px;">
+                <!-- User Feedback Option -->
+                <label class="checkbox-option" id="option-user" style="display: flex; align-items: flex-start; gap: 12px;">
+                    <input type="checkbox" name="feedback-type" value="user" onchange="updateFeedbackOptions()" style="flex-shrink: 0; margin-top: 4px;">
+                    <div style="flex: 1;">
+                        <div class="option-title">💬 I'm a user</div>
+                        <div class="option-desc">Suggestions, feature requests, or general feedback about Sniff</div>
+                    </div>
+                </label>
+
+                <!-- User Feedback Form (unfurls here) -->
+                <div id="userFeedbackForm" class="feedback-form">
+                    <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Who do we have the pleasure of addressing? *</label>
+                        <input type="text" id="userName" placeholder="First name or handle" required>
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Email *</label>
+                        <input type="email" id="userEmail" placeholder="your.email@example.com" required>
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">What's up? *</label>
+                        <textarea id="feedbackMessage" placeholder="Tell us what's on your mind..." required></textarea>
+
+                        <button type="submit">Send a note</button>
+                    </form>
+
+                    <div id="successMessage" class="success-message"></div>
+                    <div id="errorMessage" class="error-message"></div>
+                </div>
+
+                <!-- Developer Feedback Option -->
+                <label class="checkbox-option" id="option-developer" style="display: flex; align-items: flex-start; gap: 12px;">
+                    <input type="checkbox" name="feedback-type" value="developer" onchange="updateFeedbackOptions()" style="flex-shrink: 0; margin-top: 4px;">
+                    <div style="flex: 1;">
+                        <div class="option-title">🐛 I'm a developer</div>
+                        <div class="option-desc">Bug reports, technical issues, or code contributions</div>
+                    </div>
+                </label>
+
+                <!-- Developer Feedback Button (unfurls here) -->
+                <div id="developerFeedbackButton" class="feedback-form">
+                    <p style="color: #666; margin-bottom: 15px; font-size: 14px;">Report bugs, request features, or contribute code on GitHub</p>
+                    <a href="https://github.com/oracle000-om/sniff-api/issues/new" target="_blank" class="btn-github" style="display: block; padding: 16px; text-decoration: none;">
+                        Open GitHub Issues
+                    </a>
+                </div>
+
+                <!-- Partnership Option -->
+                <label class="checkbox-option" id="option-partner" style="display: flex; align-items: flex-start; gap: 12px;">
+                    <input type="checkbox" name="feedback-type" value="partner" onchange="updateFeedbackOptions()" style="flex-shrink: 0; margin-top: 4px;">
+                    <div style="flex: 1;">
+                        <div class="option-title">🤝 I want to partner with you</div>
+                        <div class="option-desc">Shelter and rescue partnerships, collaborations, or sponsorship opportunities</div>
+                    </div>
+                </label>
+
+                <!-- Partnership Form (unfurls here) -->
+                <div id="partnershipForm" class="feedback-form">
+                    <p style="color: #666; margin-bottom: 15px; font-size: 14px;">Let's explore how we can work together</p>
+                    <form id="partnerForm" onsubmit="submitPartnership(event)">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Organization Name *</label>
+                        <input type="text" id="partnerOrg" placeholder="Your organization" required>
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Website *</label>
+                        <input type="text" id="partnerWebsite" placeholder="Your website" required>
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Your Name *</label>
+                        <input type="text" id="partnerName" placeholder="Your name" required>
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Email *</label>
+                        <input type="email" id="partnerEmail" placeholder="your.email@example.com" required>
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #2d2d2d;">Partnership Idea *</label>
+                        <textarea id="partnerMessage" placeholder="Tell us about your partnership proposal..." required></textarea>
+
+                        <button type="submit">Send it!</button>
+                    </form>
+
+                    <div id="partnerSuccessMessage" class="success-message"></div>
+                    <div id="partnerErrorMessage" class="error-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+<footer style="margin-top: 60px; padding: 40px 20px; background: #f8f9fa; border-top: 2px solid #e0e0e0; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <p style="font-size: 18px; font-weight: 600; color: #2d2d2d; margin-bottom: 20px;">
+            Sniff will now and forever remain free to use for all.
+        </p>
+
+        <div style="width: 60px; height: 2px; background: #ff6b35; margin: 20px auto;"></div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 20px;">
+            <a href="/ways-to-help" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                ways to help
+            </a>
+            <a href="/say-hi" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                say hi
+            </a>
+            <a href="#" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                reddit
+            </a>
+        </div>
+
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            © 2025 Sniff · built with ❤️ for the pets who love us, in honor of Henry
+        </p>
+    </div>
+</footer>
+
+    <script>
+        function updateFeedbackOptions() {
+            const userCheckbox = document.querySelector('input[value="user"]');
+            const developerCheckbox = document.querySelector('input[value="developer"]');
+            const partnerCheckbox = document.querySelector('input[value="partner"]');
+            const userForm = document.getElementById('userFeedbackForm');
+            const developerButton = document.getElementById('developerFeedbackButton');
+            const partnerForm = document.getElementById('partnershipForm');
+
+            // Update visual selection
+            document.getElementById('option-user').classList.toggle('selected', userCheckbox.checked);
+            document.getElementById('option-developer').classList.toggle('selected', developerCheckbox.checked);
+            document.getElementById('option-partner').classList.toggle('selected', partnerCheckbox.checked);
+
+            // Show/hide forms
+            if (userCheckbox.checked) {
+                userForm.classList.add('active');
+            } else {
+                userForm.classList.remove('active');
+            }
+
+            if (developerCheckbox.checked) {
+                developerButton.style.display = 'block';
+            } else {
+                developerButton.style.display = 'none';
+            }
+
+            if (partnerCheckbox.checked) {
+                partnerForm.classList.add('active');
+            } else {
+                partnerForm.classList.remove('active');
+            }
+        }
+
+        async function submitFeedback(event) {
+            event.preventDefault();
+
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+
+            // Hide previous messages
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Collect form data
+            const formData = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                message: document.getElementById('feedbackMessage').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Format email body
+            const emailBody = `
+New Sniff Feedback
+
+From: ${formData.name}
+Email: ${formData.email}
+Submitted: ${new Date(formData.timestamp).toLocaleString()}
+
+Message:
+${formData.message}
+            `.trim();
+
+            try {
+                // Create mailto link
+                const subject = encodeURIComponent('Sniff Feedback');
+                const body = encodeURIComponent(emailBody);
+                const mailtoLink = `mailto:enter@daye.town?subject=${subject}&body=${body}`;
+
+                // Open default email client
+                window.location.href = mailtoLink;
+
+                // Show success message
+                const successEl = document.getElementById('successMessage');
+                successEl.innerHTML = `
+                    <strong>✅ Email client opened!</strong><br><br>
+                    If your email client didn't open, please send to: <strong>enter@daye.town</strong>
+                `;
+                successEl.style.display = 'block';
+
+                // Clear form
+                document.getElementById('feedbackForm').reset();
+
+                // Reset button after a delay
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send a note';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Feedback error:', error);
+
+                const errorEl = document.getElementById('errorMessage');
+                errorEl.innerHTML = `
+                    <strong>⚠️ Could not open email client</strong><br><br>
+                    Please send your feedback directly to: <strong>enter@daye.town</strong>
+                `;
+                errorEl.style.display = 'block';
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send a note';
+            }
+        }
+
+        async function submitPartnership(event) {
+    event.preventDefault();
+
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+
+    document.getElementById('partnerSuccessMessage').style.display = 'none';
+    document.getElementById('partnerErrorMessage').style.display = 'none';
+
+    const formData = {
+        org: document.getElementById('partnerOrg').value,
+        name: document.getElementById('partnerName').value,
+        email: document.getElementById('partnerEmail').value,
+        message: document.getElementById('partnerMessage').value,
+        timestamp: new Date().toISOString()
+    };
+
+    const emailBody = `
+New Partnership Inquiry - Sniff
+
+Organization: ${formData.org}
+Contact: ${formData.name}
+Email: ${formData.email}
+Submitted: ${new Date(formData.timestamp).toLocaleString()}
+
+Partnership Proposal:
+${formData.message}
+    `.trim();
+
+    try {
+        const subject = encodeURIComponent('Sniff Partnership Inquiry');
+        const body = encodeURIComponent(emailBody);
+        const mailtoLink = `mailto:enter@daye.town?subject=${subject}&body=${body}`;
+
+        window.location.href = mailtoLink;
+
+        const successEl = document.getElementById('partnerSuccessMessage');
+        successEl.innerHTML = `
+            <strong>✅ Email client opened!</strong><br><br>
+            If your email client didn't open, please send to: <strong>enter@daye.town</strong>
+        `;
+        successEl.style.display = 'block';
+
+        document.getElementById('partnerForm').reset();
+
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Partnership Inquiry';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Partnership error:', error);
+
+        const errorEl = document.getElementById('partnerErrorMessage');
+        errorEl.innerHTML = `
+            <strong>⚠️ Could not open email client</strong><br><br>
+            Please send your inquiry directly to: <strong>enter@daye.town</strong>
+        `;
+        errorEl.style.display = 'block';
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Partnership Inquiry';
+    }
+}
+
+    </script>
+</body>
+
+</html>

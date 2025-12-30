@@ -9,28 +9,34 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
 *.so
 .Python
+*.egg-info/
+
+# Virtual environments
 venv/
 env/
-*.egg-info/
 
 # Docker volumes & databases
 volumes/
-backups/
 *.db
 *.db-shm
 *.db-wal
-milvus_demo.db
+
+# Backups
+backups/
+backup_*/
+
+# Data files (images, claims, analytics)
+data/images/
+data/claims.json
+data/analytics.json
+data/test_images/
 
 # Migration temp files
 migration_data.json
-
-# Test images - keep local only, don't commit
-data/test_images/
-
-# Analytics
-data/analytics.json
 
 # Environment variables
 .env
@@ -39,3 +45,7 @@ data/analytics.json
 # Logs
 *.log
 backup.log
+
+# IDE
+.vscode/
+.idea/

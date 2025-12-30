@@ -2,7 +2,7 @@
 
 Sniff uses AI-powered facial recognition to help lost pets find their way home. Animal shelters and good samaritans can register found pets, and owners can search to find potential matches.
 
-Sniff will now and forever remain free to use for all.
+**Sniff will now and forever remain free to use for all.**
 
 🌐 **Live at:** [sniffhome.org](https://sniffhome.org)
 
@@ -11,23 +11,33 @@ Sniff will now and forever remain free to use for all.
 ## ✨ Features
 
 ### For Pet Owners
+
 - 🔍 **AI-Powered Search** - Upload a photo of your pet and instantly search the database
 - 📊 **Match Confidence** - See similarity scores for potential matches
 - 🏷️ **Claim System** - Claim your pet when you find a match
-- 📱 **Mobile Friendly** - Works on all devices
+- 📱 **Mobile Responsive** - Optimized for all devices
 
 ### For Shelters & Finders
-- 📸 **Easy Registration** - Upload photos of found pets with details
+
+- 📸 **Dual Registration Paths** - Shelter intake or Good Samaritan reports
+- 🏥 **Shelter Hero Mode** - Track microchips, intake names, and organization info
+- 🦸 **Good Samaritan Mode** - Report found pets with location and holding status
+- 📍 **Location Tracking** - GPS auto-fill for where pets were found
 - 🔒 **Privacy First** - Contact info protected until claims are made
-- 📈 **Real-Time Stats** - Track total pets and successful reunions
-- 🤝 **Community Driven** - Good Samaritans can also register found pets
+
+### Community & Support
+
+- 💬 **Say Hi Page** - User feedback, developer contributions, and partnership inquiries
+- 🤝 **Ways to Help** - Spread awareness, contribute code, or support the mission
+- 📥 **Resource Downloads** - Flyers and media kits for community outreach
 
 ### Technical Features
+
 - 🧠 **Deep Learning** - 2048-dimension facial embeddings for high accuracy
 - ⚡ **Fast Search** - Vector similarity search with Milvus
-- 🔐 **Privacy Compliant** - Hashed IPs, GDPR-ready
-- 📊 **Analytics** - Track searches, registrations, and claims
-- 💾 **Auto Backups** - Daily database backups with 7-day retention
+- 🔐 **Privacy Compliant** - Hashed IPs, localStorage tracking
+- 📊 **Real-time Stats** - Live pet registration counter
+- 🎨 **Modern UI** - Clean, accessible interface with mobile-first design
 - 🐳 **Production Ready** - Dockerized Milvus for scalability
 
 ---
@@ -35,17 +45,21 @@ Sniff will now and forever remain free to use for all.
 ## 🛠️ Tech Stack
 
 **Backend:**
+
 - FastAPI (Python web framework)
 - Milvus (Vector database)
 - DeepFace (Facial recognition)
 - OpenCV (Image processing)
 
 **Frontend:**
+
 - Vanilla JavaScript
-- Responsive CSS
+- Responsive CSS with clamp() scaling
 - Mobile-first design
+- localStorage for claim tracking
 
 **Infrastructure:**
+
 - Docker & Docker Compose
 - Railway (Deployment)
 - GitHub (Version control)
@@ -55,6 +69,7 @@ Sniff will now and forever remain free to use for all.
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - Docker Desktop
 - Git
@@ -62,23 +77,27 @@ Sniff will now and forever remain free to use for all.
 ### Installation
 
 1. **Clone the repository:**
+
 ```bash
-git clone https://github.com/yourusername/sniff-api.git
+git clone https://github.com/oracle000-om/sniff-api.git
 cd sniff-api
 ```
 
 2. **Create virtual environment:**
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 3. **Install dependencies:**
+
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt --break-system-packages
 ```
 
 4. **Start Docker Milvus:**
+
 ```bash
 docker-compose up -d
 ```
@@ -86,11 +105,13 @@ docker-compose up -d
 Wait 60 seconds for services to start.
 
 5. **Run the application:**
+
 ```bash
 uvicorn app:app --reload
 ```
 
 6. **Open browser:**
+
 ```
 http://localhost:8000
 ```
@@ -106,16 +127,19 @@ The application uses three Docker containers:
 - **milvus-minio** - Object storage for Milvus
 
 **Check status:**
+
 ```bash
 docker ps
 ```
 
 **Stop services:**
+
 ```bash
 docker-compose down
 ```
 
 **View logs:**
+
 ```bash
 docker-compose logs -f
 ```
@@ -126,29 +150,75 @@ docker-compose logs -f
 
 ### Register a Found Pet
 
-1. Select role: Shelter or Good Samaritan
+**Shelter Path:**
+
+1. Select "🏥 Shelter Hero"
 2. Upload clear photo of the pet's face
-3. Fill in details (name, species, location, contact)
-4. Submit registration
+3. Enter intake name, species, microchip (if available)
+4. Select or add your shelter/organization
+5. Add any behavioral notes
+6. Submit registration
+
+**Good Samaritan Path:**
+
+1. Select "🦸 Good Samaritan"
+2. Upload clear photo of the pet's face
+3. Enter name from tag (if visible), species, microchip (if checked)
+4. Select if you're holding the pet or just spotted them
+5. Enter location found (or use GPS auto-fill)
+6. Add contact info (required if holding the pet)
+7. Submit registration
 
 ### Search for Your Lost Pet
 
-1. Upload a clear photo of your pet
-2. View potential matches with confidence scores
-3. Claim your pet if you find a match
-4. Contact info revealed after claiming
+1. Navigate to "Find Your Lost Pet" card
+2. Upload a clear photo of your pet
+3. View potential matches with confidence scores
+4. Review match details (species, location, finder info)
+5. Claim your pet if you find a match
+6. Contact info revealed after claiming
 
-### Claim Rules
+### Claim System
 
-- Each person can claim each pet once
-- Maximum 10 different pets per user
-- Claims tracked by IP (privacy-protected with hashing)
+- Claims tracked via localStorage (privacy-first approach)
+- Each browser can claim each pet once
+- Warning message reminds users to only claim genuine matches
 - Color-coded badges show claim activity:
+  - No badge: Unclaimed
   - 🟡 Yellow: 1 claimer
   - 🟠 Orange: 2-3 claimers
   - 🔴 Red: 4-5 claimers
   - 🚨 Dark Red: 6-9 claimers
-  - 🚫 Max: 10+ claimers (contact directly)
+  - 🚫 Alert: 10+ claimers (contact directly)
+
+**Claim Validation:**
+
+- Confirmation dialog warns against false claims
+- Rate limiting: 5 claims per IP per hour
+- Tooltips explain high claim counts
+
+---
+
+## 📄 Pages
+
+### Home (`/`)
+
+- Dual registration form (shelter/finder)
+- Pet search and matching
+- Live stats counter
+
+### Ways to Help (`/ways-to-help`)
+
+- Download flyers and media kits
+- Find local shelters
+- Support via Ko-fi
+- GitHub repository and contributions
+
+### Say Hi (`/say-hi`)
+
+- **I'm a user** - General feedback form
+- **I'm a developer** - GitHub issues link
+- **I want to partner** - Partnership inquiry form
 
 ---
 
@@ -157,6 +227,7 @@ docker-compose logs -f
 ### Automatic Backups
 
 Daily backups run at 2 AM (if cron configured):
+
 ```bash
 # Set up cron job
 crontab -e
@@ -166,6 +237,7 @@ crontab -e
 ```
 
 ### Manual Backup
+
 ```bash
 python3 backup_database.py
 ```
@@ -174,9 +246,8 @@ Backups stored in `backups/` directory (last 7 kept).
 
 ### Restore from Backup
 
-See `RESTORE.md` for detailed instructions.
-
 Quick restore:
+
 ```bash
 # Stop app first
 docker-compose down
@@ -198,6 +269,7 @@ uvicorn app:app --reload
 ### Environment Variables
 
 Create `.env` file for production:
+
 ```bash
 PORT=8000
 MILVUS_HOST=localhost
@@ -208,12 +280,14 @@ SALT_SECRET=your-random-salt-here
 ### Change Claim Salt (Production)
 
 ⚠️ **Important:** Change the salt in `app.py` before production:
+
 ```python
 # In /api/v1/claim endpoint
 salt = "your-unique-random-salt-here"  # Change this!
 ```
 
 Generate random salt:
+
 ```bash
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
@@ -223,33 +297,37 @@ python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ## 📊 Health Check
 
 Monitor application health:
+
 ```bash
 curl http://localhost:8000/health
 ```
 
-Response:
-```json
-{
-  "status": "healthy",
-  "database": "connected",
-  "pets_registered": 42,
-  "images_stored": 42,
-  "data_synced": true,
-  "disk_free_gb": 120.5,
-  "timestamp": "2025-10-24T12:00:00"
-}
-```
+Response includes:
+
+- Database connection status
+- Total pets registered
+- Images stored
+- Disk space available
 
 ---
 
-## 🚀 Deployment (Railway)
+## 🚀 Deployment
 
-1. **Create Railway account:** https://railway.app
-2. **Connect GitHub repo**
-3. **Add environment variables**
-4. **Deploy!**
+### Prerequisites
 
-Detailed deployment guide: See `DEPLOY.md` (if created)
+- Milvus running (Docker or cloud)
+- Python 3.11+ environment
+- Static file serving configured
+
+### Production Checklist
+
+- [ ] Change claim salt in `app.py`
+- [ ] Set up environment variables
+- [ ] Configure HTTPS/SSL
+- [ ] Enable rate limiting
+- [ ] Set up automated backups
+- [ ] Add monitoring/analytics
+- [ ] Update contact email in say-hi page
 
 ---
 
@@ -263,32 +341,46 @@ We welcome contributions! Here's how:
 4. Push to branch: `git push origin feature-name`
 5. Open Pull Request
 
+### Ways to Contribute
+
+- **Code:** Bug fixes, features, optimizations
+- **Design:** UI/UX improvements, mobile optimization
+- **Content:** Flyers, social media graphics, translations
+- **Outreach:** Share with shelters, spread awareness
+- **Support:** Ko-fi donations for server costs
+
 ### Development Guidelines
 
 - Follow PEP 8 style guide
-- Add tests for new features
+- Add comments for complex logic
+- Test on mobile devices
 - Update documentation
 - Keep commits atomic and descriptive
 
 ---
 
 ## 📁 Project Structure
+
 ```
 sniff-api/
-├── app.py                 # Main FastAPI application
+├── app.py                    # Main FastAPI application
+├── database.py               # Milvus connection handler
 ├── models/
-│   ├── matching.py        # Pet matching logic
-│   └── quality_check.py   # Image quality checker
+│   ├── matching.py           # Pet matching logic
+│   └── quality_check.py      # Image quality checker
 ├── templates/
-│   └── index.html         # Frontend interface
+│   ├── index.html            # Main page
+│   ├── ways-to-help.html     # Community support page
+│   └── say-hi.html           # Feedback & partnerships
+├── static/
+│   └── sniff_flyer.pdf       # Downloadable flyer
 ├── data/
-│   ├── images/            # Uploaded pet photos
-│   └── claims.json        # Claim tracking
-├── backups/               # Database backups
-├── docker-compose.yml     # Docker services
-├── backup_database.py     # Backup script
-├── migrate_to_docker.py   # Migration script
-├── requirements.txt       # Python dependencies
+│   ├── images/               # Uploaded pet photos
+│   └── claims.json           # Claim tracking
+├── backups/                  # Database backups
+├── docker-compose.yml        # Docker services
+├── backup_database.py        # Backup script
+├── requirements.txt          # Python dependencies
 └── README.md
 ```
 
@@ -296,17 +388,21 @@ sniff-api/
 
 ## 🔒 Privacy & Security
 
-- ✅ **IP Hashing** - User IPs hashed with salt (GDPR compliant)
+- ✅ **IP Hashing** - User IPs hashed with salt
 - ✅ **No Personal Data** - Only hashed identifiers stored
 - ✅ **Protected Contacts** - Finder info only shown after claim
-- ✅ **Rate Limiting** - Claim limits prevent spam
+- ✅ **Rate Limiting** - 5 claims per IP per hour
+- ✅ **localStorage Tracking** - Privacy-first claim tracking
 - ✅ **Secure Storage** - Docker volumes for persistence
+- ✅ **Input Validation** - File type and size checks
 
 **Note:** For production, implement additional security:
+
 - HTTPS/SSL certificates
-- Rate limiting on API endpoints
-- Input validation and sanitization
+- API rate limiting
+- Input sanitization
 - Regular security audits
+- GDPR compliance measures
 
 ---
 
@@ -323,27 +419,40 @@ This project is open source and available under the MIT License.
 - **DeepFace** - Face recognition library
 - **Milvus** - Vector database
 - **FastAPI** - Web framework
+- **All contributors** - Thank you for helping reunite pets with their families
 
 ---
 
 ## 📧 Contact
 
 - **Website:** [sniffhome.org](https://sniffhome.org)
+- **Feedback:** [Say Hi Page](https://sniffhome.org/say-hi)
 - **Issues:** [GitHub Issues](https://github.com/oracle000-om/sniff-api/issues)
-- **Email:** support@sniffhome.org (coming soon)
+- **Email:** enter@daye.town
 
 ---
 
 ## 🗺️ Roadmap
 
-**Phase 1 (Launched):**
-- ✅ Basic facial recognition
-- ✅ Shelter registration
-- ✅ Search and claim system
-- ✅ Docker deployment
+**v2.0 (Current):**
+
+- ✅ Dual registration paths (shelter/finder)
+- ✅ Mobile-responsive design
+- ✅ Community pages (ways-to-help, say-hi)
+- ✅ Enhanced claim system with validation
+- ✅ GPS location auto-fill
+- ✅ Partnership inquiry system
+
+**Future:**
+
+- 🔄 Email notifications for matches
+- 🔄 Multi-language support
+- 🔄 Advanced filtering (by location, species, date)
+- 🔄 Success stories showcase
+- 🔄 Shelter dashboard analytics
 
 ---
 
 **Built with ❤️ for the pets who love us, in honor of Henry**
 
-🐾 Together, we bring them home.
+🐾 Together, we bring our buddies home.

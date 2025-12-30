@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ways to Help - Sniff</title>
+    <link rel="icon" type="image/svg+xml"
+          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🐾</text></svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #fef5f1 0%, #fff 100%);
+            min-height: 100vh;
+            padding: clamp(10px, 3vw, 20px);
+            color: #2d2d2d;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .paw-icon {
+            font-size: clamp(40px, 8vw, 60px);
+            line-height: 1;
+        }
+
+        h1 {
+            font-size: clamp(32px, 6vw, 48px);
+            font-weight: 700;
+            color: #2d2d2d;
+            letter-spacing: -1px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: clamp(30px, 5vw, 50px);
+            padding: clamp(20px, 5vw, 40px);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero h2 {
+            font-size: clamp(24px, 5vw, 36px);
+            color: #2d2d2d;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: clamp(16px, 3vw, 20px);
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .cards {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: clamp(20px, 4vw, 35px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            color: #FF9F66;
+            margin-bottom: 15px;
+            font-size: clamp(20px, 4vw, 26px);
+            font-weight: 600;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .stats-line {
+            background: #fff9f5;
+            border-left: 4px solid #FF9F66;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .stats-line ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .stats-line li {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .stats-line li:last-child {
+            margin-bottom: 0;
+        }
+
+        .option-group {
+            margin-bottom: 25px;
+        }
+
+        .checkbox-option {
+            display: block;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .checkbox-option:hover {
+            border-color: #FF9F66;
+            background: #fff9f5;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #FF9F66;
+        }
+
+        .checkbox-option input[type="checkbox"]:checked {
+            accent-color: #FF9F66;
+        }
+
+        .checkbox-option.selected {
+            border-color: #FF9F66;
+            background: #fff9f5;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-option .option-title {
+            font-weight: 600;
+            color: #2d2d2d;
+            margin-bottom: 4px;
+        }
+
+        .checkbox-option .option-desc {
+            font-size: 13px;
+            color: #999;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #FF9F66;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(255, 159, 102, 0.3);
+            min-height: 48px;
+        }
+
+        button:hover {
+            background: #ff8844;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 159, 102, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ddd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .path-section {
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .path-section:hover {
+            border-color: #FF9F66;
+            background: #fff9f5;
+        }
+
+        .path-section h4 {
+            font-size: 20px;
+            color: #2d2d2d;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .path-section p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button-group button,
+        .button-group a {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-github {
+            background: #24292e;
+            color: white;
+        }
+
+        .btn-github:hover {
+            background: #1a1e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(36, 41, 46, 0.3);
+        }
+
+        .btn-sponsor {
+            background: #24292e;
+            color: white;
+        }
+
+        .btn-sponsor:hover {
+            background: #1a1e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(36, 41, 46, 0.3);
+        }
+
+        .btn-kofi {
+            background: #FF5E5B;
+            color: white;
+        }
+
+        .btn-kofi:hover {
+            background: #ee4d4a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 94, 91, 0.3);
+        }
+
+        .support-note {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: clamp(20px, 5vw, 30px);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h4 {
+            margin-bottom: 20px;
+            color: #2d2d2d;
+            font-size: 22px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #FF9F66;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+        }
+
+        .modal-buttons .btn-secondary {
+            background: #6c757d;
+        }
+
+        .modal-buttons .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .directory-links {
+            margin-top: 20px;
+        }
+
+        .directory-links a {
+            display: block;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            color: #FF9F66;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .directory-links a:hover {
+            background: #fff9f5;
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .hero {
+                padding: 20px 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .path-section {
+                padding: 18px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group button,
+            .button-group a {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .checkbox-option {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            body {
+                padding: 8px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .hero {
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="/" class="logo">
+                <div class="paw-icon">🐾</div>
+                <h1>Sniff</h1>
+            </a>
+        </header>
+
+        <!-- Cards -->
+        <div class="cards">
+            <!-- Card 1: Spread the Word -->
+            <div class="card">
+                <h3>Spread the Word</h3>
+                <p>
+                    The more strays that are registered, the more pets find their way home. Help spread the word in
+                    your community.
+                </p>
+
+                <!-- Shelter Stats -->
+                <div class="stats-line">
+                    <ul>
+                        <li>💔 Almost 1 million shelter animals are euthanized every year in America</li>
+                        <li>📊 Strays make up 60% of animal shelter intakes</li>
+                        <li>🏠 25% of strays are lost pets with families searching for them</li>
+                    </ul>
+                </div>
+
+                <!-- Options -->
+                <div class="option-group">
+                    <label class="checkbox-option" id="option1">
+                        <input type="checkbox" name="help-option" value="flyers" onchange="updateSelection()">
+                        <div>
+                            <div class="option-title">Give me flyers to post</div>
+                            <div class="option-desc">Download printable flyers to post at shelters, dog parks,
+                                trailheads, under lost pet signs, and other community spaces</div>
+                        </div>
+                    </label>
+
+                    <label class="checkbox-option" id="option3">
+                        <input type="checkbox" name="help-option" value="search" onchange="updateSelection()">
+                        <div>
+                            <div class="option-title">Search my community</div>
+                            <div class="option-desc">Find shelters and rescues near you to contact</div>
+                        </div>
+                    </label>
+                </div>
+
+                <button id="getResourcesBtn" onclick="getResources()" disabled>
+                    Help us help them
+                </button>
+            </div>
+
+            <!-- Card 2: Build Sniff -->
+            <div class="card">
+                <h3>Build Sniff</h3>
+                <p>Sniff is free for all, forever. Your support keeps it running and growing.</p>
+
+                <!-- Path A: Animal Lover -->
+                <div class="path-section">
+                    <h4>❤️ I'm an animal lover</h4>
+                    <p>Support server costs and continued development</p>
+                    <div class="button-group">
+                        <a href="https://ko-fi.com/itsmedaye" target="_blank" class="btn-kofi">☕ Keep Sniff alive</a>
+                    </div>
+                    <div style="font-size: 13px; color: #999; margin-top: 10px; text-align: center;">
+                        From one animal lover to another, I appreciate you ❤️
+                    </div>
+                </div>
+
+                <!-- Path B: Developer -->
+                <div class="path-section">
+                    <h4>💻 I'm a developer</h4>
+                    <p>Contribute to the codebase or sponsor ongoing development</p>
+                    <div class="button-group">
+                        <a href="https://github.com/oracle000-om/sniff-api" target="_blank" class="btn-github">GitHub</a>
+                        <a href="#" target="_blank" class="btn-sponsor"
+                           onclick="alert('GitHub Sponsors coming soon!'); return false;">⭐ Sponsor</a>
+                    </div>
+                </div>
+
+                <!-- Support Note -->
+                <div class="support-note">
+                    Your support covers server costs, community support, and helping Sniff get better every day.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Search Community -->
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content">
+            <h4>Find Shelters Near You</h4>
+            <p style="margin-bottom: 20px; color: #666;">Enter your location to find nearby shelters and rescues</p>
+
+            <input type="text" id="zipInput" placeholder="Enter zip code or city name">
+
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button onclick="searchShelters()">Search</button>
+            </div>
+
+            <div class="directory-links">
+                <p style="margin-bottom: 15px; color: #666; font-size: 14px;">Or use this directory:</p>
+                <a href="https://www.petfinder.com/animal-shelters-and-rescues/search" target="_blank">→ Petfinder Shelter Search</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+<footer style="margin-top: 60px; padding: 40px 20px; background: #f8f9fa; border-top: 2px solid #e0e0e0; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <p style="font-size: 18px; font-weight: 600; color: #2d2d2d; margin-bottom: 20px;">
+            Sniff will now and forever remain free to use for all.
+        </p>
+
+        <div style="width: 60px; height: 2px; background: #ff6b35; margin: 20px auto;"></div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <a href="/ways-to-help" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                ways to help
+            </a>
+            <a href="/say-hi" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                say hi
+            </a>
+            <a href="#" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                reddit
+            </a>
+        </div>
+
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            © 2025 Sniff · built with ❤️ for the pets who love us, in honor of Henry
+        </p>
+    </div>
+</footer>
+
+    <script>
+        let selectedOptions = new Set();
+
+        function updateSelection() {
+            selectedOptions.clear();
+
+            document.querySelectorAll('input[name="help-option"]:checked').forEach(checkbox => {
+                selectedOptions.add(checkbox.value);
+            });
+
+            const btn = document.getElementById('getResourcesBtn');
+            if (selectedOptions.size > 0) {
+                btn.disabled = false;
+                btn.textContent = 'Help us help them';
+            } else {
+                btn.disabled = true;
+                btn.textContent = 'Select at least one option above';
+            }
+
+            document.querySelectorAll('.checkbox-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            if (selectedOptions.has('flyers')) {
+                document.getElementById('option1').classList.add('selected');
+            }
+            if (selectedOptions.has('media-pack')) {
+                document.getElementById('option2').classList.add('selected');
+            }
+            if (selectedOptions.has('search')) {
+                document.getElementById('option3').classList.add('selected');
+            }
+        }
+
+        function getResources() {
+            if (selectedOptions.size === 0) return;
+
+            if (selectedOptions.has('flyers')) {
+                downloadFlyer();
+            }
+            if (selectedOptions.has('media-pack')) {
+                downloadMediaPack();
+            }
+            if (selectedOptions.has('search')) {
+                if (selectedOptions.size > 1) {
+                    setTimeout(openModal, 500);
+                } else {
+                    openModal();
+                }
+            }
+        }
+
+        function downloadFlyer() {
+            const link = document.createElement('a');
+            link.href = '/static/sniff_flyer.pdf';
+            link.download = 'sniff_flyer.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            if (selectedOptions.size === 1 && selectedOptions.has('flyers')) {
+                alert('📥 Flyer downloaded! Print it out and start posting!');
+            }
+        }
+
+        function downloadMediaPack() {
+            alert('📦 Media pack download coming soon!\n\nFor now, the flyer is available. Email enter@daye.town for the full media kit.');
+        }
+
+        function openModal() {
+            document.getElementById('searchModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('searchModal').style.display = 'none';
+            document.getElementById('zipInput').value = '';
+        }
+
+        function searchShelters() {
+            const zip = document.getElementById('zipInput').value.trim();
+
+            if (!zip) {
+                alert('Please enter a zip code or city name');
+                return;
+            }
+
+            const searchQuery = encodeURIComponent(`animal shelter near ${zip}`);
+            window.open(`https://www.google.com/maps/search/${searchQuery}`, '_blank');
+
+            closeModal();
+        }
+
+        // Close modal on outside click
+        const modal = document.getElementById('searchModal');
+        modal.addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

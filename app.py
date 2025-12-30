@@ -1,69 +1,20 @@
-from fastapi import FastAPI, UploadFile, File, Form, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, UploadFile, File, Form, Request, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
-import torch
-import torchvision.transforms as transforms
-import timm
-import io
-import os
-import json
 import uuid
 import cv2
-from pathlib import Path
+import os
+import json
 import hashlib
 from datetime import datetime
 
+from database import db
 from models.detection import PetDetector
-from models.matching import PetMatcher
 from models.embedding import PetEmbedder
 from models.image_quality import ImageQualityChecker
-
-from pymilvus import (
-    connections,
-    Collection,
-    FieldSchema,
-    CollectionSchema,
-    DataType,
-    utility,
-)
-from PIL import Image
-
-
-def log_event(event_type, data=None):
-    """Simple event logging for analytics"""
-    try:
-        log_file = Path("data/analytics.json")
-        log_file.parent.mkdir(exist_ok=True, parents=True)
-
-        event = {
-            "timestamp": datetime.now().isoformat(),
-            "type": event_type,
-            "data": data or {},
-        }
-
-        if log_file.exists():
-            with open(log_file, "r") as f:
-                events = json.load(f)
-        else:
-            events = []
-
-        events.append(event)
-
-        # Keep last 10000 events
-        with open(log_file, "w") as f:
-            json.dump(events[-10000:], f, indent=2)
-    except Exception as e:
-        print(f"⚠️ Analytics logging failed: {e}")
-
-
-images_dir = Path("data/images")
-images_dir.mkdir(exist_ok=True, parents=True)
-
-templates = Jinja2Templates(directory="templates")
-
 
 app = FastAPI(
     title="Sniff API",
@@ -71,158 +22,63 @@ app = FastAPI(
     version="1.0.0-mvp",
 )
 
-# Ensure data directory exists
+# Ensure directories exist
 os.makedirs("data/images", exist_ok=True)
+os.makedirs("data/temp", exist_ok=True)
 os.makedirs("data", exist_ok=True)
 
 # Mount static files
 app.mount("/data", StaticFiles(directory="data"), name="data")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Connect to Milvus - use Lite on Railway, Docker locally
-import os
+# Templates
+templates = Jinja2Templates(directory="templates")
 
-RAILWAY_ENV = os.getenv("RAILWAY_ENVIRONMENT")
-print(f"🔌 Connecting to Milvus ({'Lite' if RAILWAY_ENV else 'Docker'})...")
-
-try:
-    if RAILWAY_ENV:
-        # Railway: Use Milvus Lite (embedded database)
-        connections.connect(alias="default", uri="./milvus_demo.db")
-    else:
-        # Local: Use Docker Milvus
-        connections.connect(alias="default", host="localhost", port="19530")
-
-    print("✅ Connected to Milvus successfully")
-except Exception as e:
-    print(f"❌ Connection error: {e}")
-    raise
-
-# Define collection schema
-COLLECTION_NAME = "pet_images"
-DIM = 2048  # ResNet50 feature dimension
-
-# Check if collection exists, create if not
-if utility.has_collection(COLLECTION_NAME):
-    try:
-        collection = Collection(COLLECTION_NAME)
-        collection.load()
-        print(f"✅ Collection loaded. Total pets: {collection.num_entities}")
-    except Exception as e:
-        print(f"❌ ERROR: Collection exists but won't load: {e}")
-        print("⚠️ MANUAL ACTION REQUIRED - Do not auto-delete production data!")
-        raise  # Stop startup, don't delete data!
-
-# Create collection if needed
-if not utility.has_collection(COLLECTION_NAME):
-    print(f"📦 Creating collection '{COLLECTION_NAME}'...")
-
-    fields = [
-        FieldSchema(
-            name="pet_id", dtype=DataType.VARCHAR, max_length=100, is_primary=True
-        ),
-        FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=DIM),
-        FieldSchema(name="pet_name", dtype=DataType.VARCHAR, max_length=100),
-        FieldSchema(name="species", dtype=DataType.VARCHAR, max_length=50),
-        FieldSchema(name="microchip", dtype=DataType.VARCHAR, max_length=100),
-        FieldSchema(name="location_found", dtype=DataType.VARCHAR, max_length=500),
-        FieldSchema(name="finder_name", dtype=DataType.VARCHAR, max_length=100),
-        FieldSchema(name="finder_contact", dtype=DataType.VARCHAR, max_length=100),
-        FieldSchema(name="shelter_id", dtype=DataType.VARCHAR, max_length=100),
-        FieldSchema(name="report_type", dtype=DataType.VARCHAR, max_length=50),
-        FieldSchema(name="holding_pet", dtype=DataType.VARCHAR, max_length=10),
-        FieldSchema(name="notes", dtype=DataType.VARCHAR, max_length=1000),
-    ]
-
-    schema = CollectionSchema(fields, description="Pet image recognition database")
-    collection = Collection(COLLECTION_NAME, schema)
-
-    # Create index for vector search
-    index_params = {
-        "metric_type": "L2",
-        "index_type": "IVF_FLAT",
-        "params": {"nlist": 128},
-    }
-    collection.create_index("embedding", index_params)
-    collection.load()
-    print("✅ Collection created, indexed, and loaded")
-
-# Ensure collection is loaded
-collection = Collection(COLLECTION_NAME)
-collection.load()
-print(f"✅ Collection ready. Total pets: {collection.num_entities}")
-
-# Load AI model
-print("🤖 Loading ResNet50 model...")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# Use torchvision ResNet50 instead of timm (more reliable, no auth needed)
-try:
-    from torchvision.models import resnet50, ResNet50_Weights
-
-    # Load with pretrained weights
-    weights = ResNet50_Weights.IMAGENET1K_V1
-    model = resnet50(weights=weights)
-
-    # Remove classification head (we only want features)
-    model = torch.nn.Sequential(*list(model.children())[:-1])
-
-    model = model.to(device)
-    model.eval()
-    print(f"✅ Model loaded on {device}")
-
-except Exception as e:
-    print(f"⚠️ Torchvision model failed: {e}")
-    print("Falling back to timm without pretrained weights...")
-
-    # Fallback to timm without downloading
-    model = timm.create_model("resnet50", pretrained=False, num_classes=0)
-    model = model.to(device)
-    model.eval()
-    print(f"✅ Model loaded (random weights) on {device}")
-
-# Image preprocessing (same as before)
-preprocess = transforms.Compose(
-    [
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
-
-# Image preprocessing
-preprocess = transforms.Compose(
-    [
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
-
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Accept from any origin (change in production)
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow GET, POST, PUT, DELETE, etc.
-    allow_headers=["*"],  # Allow any headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+# Initialize AI models once
+detector = PetDetector()
+embedder = PetEmbedder()
+quality_checker = ImageQualityChecker()
 
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    """Serve the UI"""
+    """Serve the main UI"""
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/ways-to-help", response_class=HTMLResponse)
+async def ways_to_help(request: Request):
+    """Serve the ways to help page"""
+    return templates.TemplateResponse("ways-to-help.html", {"request": request})
+
+
+@app.get("/say-hi", response_class=HTMLResponse)
+async def say_hi(request: Request):
+    """Serve the say hi page"""
+    return templates.TemplateResponse("say-hi.html", {"request": request})
 
 
 @app.get("/health")
 def health_check():
     """Comprehensive health check for monitoring"""
     try:
-        # Check Milvus connection
-        collection = Collection(COLLECTION_NAME)
-        collection.load()
-        pet_count = collection.num_entities
+        if not db.available:
+            return {
+                "status": "degraded",
+                "database": "offline",
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        pet_count = db.collection.num_entities if db.collection else 0
 
         # Check disk space
         import shutil
@@ -233,15 +89,11 @@ def health_check():
         # Check image directory
         image_count = len(list(Path("data/images").glob("*")))
 
-        # Check if images match database
-        image_db_match = abs(image_count - pet_count) <= 5  # Allow small variance
-
         return {
             "status": "healthy",
             "database": "connected",
             "pets_registered": pet_count,
             "images_stored": image_count,
-            "data_synced": image_db_match,
             "disk_free_gb": round(disk_free_gb, 2),
             "timestamp": datetime.now().isoformat(),
         }
@@ -250,59 +102,19 @@ def health_check():
             "status": "unhealthy",
             "error": str(e),
             "timestamp": datetime.now().isoformat(),
-        }, 500
-
-
-# Initialize detector
-detector = PetDetector()
-
-
-@app.post("/api/v1/detect")
-async def detect_pet(image: UploadFile = File(...)):
-    """
-    Detect pets in uploaded image
-
-    Returns detection results with bounding boxes
-    """
-    # Save uploaded file temporarily
-    temp_dir = Path("data/temp")
-    temp_dir.mkdir(exist_ok=True)
-
-    file_id = str(uuid.uuid4())
-    temp_path = temp_dir / f"{file_id}_{image.filename}"
-
-    with open(temp_path, "wb") as f:
-        content = await image.read()
-        f.write(content)
-
-    # Run detection
-    detections, _ = detector.detect_and_crop(str(temp_path))
-
-    # Clean up temp file
-    temp_path.unlink()
-
-    return {"detection_id": file_id, "detections": detections, "count": len(detections)}
-
-
-from models.matching import PetMatcher
-from models.embedding import PetEmbedder
-
-# Initialize models
-detector = PetDetector()
-embedder = PetEmbedder()
-matcher = PetMatcher(collection_name="pet_images")
-quality_checker = ImageQualityChecker()
+        }
 
 
 @app.get("/api/v1/stats")
 def get_stats():
     """Get statistics"""
     try:
-        collection = Collection("pet_images")
-        collection.load()
-        count = collection.num_entities
+        if not db.available:
+            return {"status": "error", "total_pets": 0, "message": "Database offline"}
 
-        # Calculate total unique claimers across all pets
+        count = db.collection.num_entities if db.collection else 0
+
+        # Calculate total unique claimers
         claims_file = Path("data/claims.json")
         total_unique_claimers = 0
         total_claim_clicks = 0
@@ -343,6 +155,11 @@ async def register_pet(
 ):
     """Register a new pet (shelter intake or found pet report)"""
 
+    if not db.available:
+        raise HTTPException(
+            status_code=503, detail="Database offline - please try again later"
+        )
+
     # Save uploaded file temporarily
     temp_dir = Path("data/temp")
     temp_dir.mkdir(exist_ok=True, parents=True)
@@ -355,11 +172,10 @@ async def register_pet(
         f.write(content)
 
     try:
-        # Check image quality (warning only, never block)
+        # Check image quality (warning only)
         quality_result = quality_checker.check_quality(str(temp_path))
         quality_warning = None
 
-        # Accept all images, warn about quality
         if not quality_result["is_good"]:
             quality_warning = "⚠️ Tip: Better lighting and focus improve match accuracy"
 
@@ -391,39 +207,32 @@ async def register_pet(
         image_path = image_dir / f"{pet_id}.jpg"
         cv2.imwrite(str(image_path), cropped[0])
 
-        # Insert directly into Milvus (bypassing PetMatcher)
-        collection = Collection(COLLECTION_NAME)
-
-        # Prepare data in exact order matching schema
+        # Insert into database
         insert_data = [
-            [pet_id],  # 1. pet_id
-            [embedding],  # 2. embedding
-            [pet_name],  # 3. pet_name
-            [
-                species if species else detections[0].get("class", "unknown")
-            ],  # 4. species
-            [microchip],  # 5. microchip
-            [location_found if report_type == "found_pet" else ""],  # 6. location_found
-            [finder_name if report_type == "found_pet" else ""],  # 7. finder_name
-            [finder_contact if report_type == "found_pet" else ""],  # 8. finder_contact
-            [shelter_id if report_type == "shelter_intake" else ""],  # 9. shelter_id
-            [report_type],  # 10. report_type
-            [holding_pet],  # 11. holding_pet
-            [notes],  # 12. notes
+            [pet_id],
+            [embedding],
+            [pet_name],
+            [species if species else detections[0].get("class", "unknown")],
+            [microchip],
+            [location_found if report_type == "found_pet" else ""],
+            [finder_name if report_type == "found_pet" else ""],
+            [finder_contact if report_type == "found_pet" else ""],
+            [shelter_id if report_type == "shelter_intake" else ""],
+            [report_type],
+            [holding_pet],
+            [notes],
         ]
 
-        # Insert and flush
-        collection.insert(insert_data)
-        collection.flush()
+        db.collection.insert(insert_data)
+        db.collection.flush()
 
         # Clean up temp file
         temp_path.unlink()
 
-        # Log success
         print(
             f"✅ Registered pet: {pet_name} ({species}) as {report_type} with ID: {pet_id}"
         )
-        print(f"📊 Total pets in collection: {collection.num_entities}")
+        print(f"📊 Total pets in collection: {db.collection.num_entities}")
 
         # Build response
         response = {
@@ -460,6 +269,11 @@ async def register_pet(
 async def match_pet(image: UploadFile = File(...)):
     """Find similar pets in the database"""
 
+    if not db.available:
+        raise HTTPException(
+            status_code=503, detail="Database offline - please try again later"
+        )
+
     # Save uploaded file temporarily
     temp_dir = Path("data/temp")
     temp_dir.mkdir(exist_ok=True)
@@ -491,12 +305,11 @@ async def match_pet(image: UploadFile = File(...)):
         # Generate embedding
         embedding = embedder.generate_body_embedding(cropped[0])
 
-        # Search in Milvus directly (bypass matcher)
-        collection = Collection(COLLECTION_NAME)
-        collection.load()
+        # Search in database
+        db.collection.load()
 
         search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
-        results = collection.search(
+        results = db.collection.search(
             data=[embedding],
             anns_field="embedding",
             param=search_params,
@@ -548,18 +361,11 @@ async def match_pet(image: UploadFile = File(...)):
                     match["pet_id"], {"total": 0, "ip_hashes": {}}
                 )
 
-                # IMPORTANT: Show unique claimers, not total clicks!
                 if isinstance(pet_claims, dict):
-                    # Count unique IP hashes (unique claimers)
                     unique_claimers = len(pet_claims.get("ip_hashes", {}))
-                    match["claims"] = (
-                        unique_claimers  # ← Changed from total to unique count
-                    )
-                    match["total_claims"] = pet_claims.get(
-                        "total", 0
-                    )  # Keep for analytics
+                    match["claims"] = unique_claimers
+                    match["total_claims"] = pet_claims.get("total", 0)
                 else:
-                    # Old format fallback
                     match["claims"] = pet_claims
                     match["total_claims"] = pet_claims
 
@@ -599,12 +405,7 @@ async def match_pet(image: UploadFile = File(...)):
 
 @app.post("/api/v1/claim")
 async def claim_pet(request: Request):
-    """
-    Record a pet claim
-    Rules:
-    - Each IP can claim each pet ONCE
-    - Each IP can claim up to 10 DIFFERENT pets total
-    """
+    """Record a pet claim"""
     try:
         body = await request.json()
         pet_id = body.get("pet_id")
@@ -612,12 +413,10 @@ async def claim_pet(request: Request):
         if not pet_id:
             return {"status": "error", "message": "Pet ID required"}
 
-        # Get client IP and hash it for privacy (GDPR compliant)
+        # Get client IP and hash it for privacy
         client_ip = request.client.host
         salt = "ZB5x0Wu2YDI0xj0ESuUeLKR0jHXnlMdQxNbCdTE73GA"
-        ip_hash = hashlib.sha256(f"{client_ip}{salt}".encode()).hexdigest()[
-            :16
-        ]  # ← ADD THIS LINE
+        ip_hash = hashlib.sha256(f"{client_ip}{salt}".encode()).hexdigest()[:16]
 
         # Load claims data
         claims_file = Path("data/claims.json")
@@ -633,11 +432,11 @@ async def claim_pet(request: Request):
         if pet_id not in claims_data:
             claims_data[pet_id] = {
                 "total": 0,
-                "ip_hashes": [],  # List of IP hashes (each appears once)
+                "ip_hashes": [],
                 "timestamps": [],
             }
 
-        # RULE 1: Check if this IP already claimed THIS specific pet
+        # Check if this IP already claimed THIS pet
         if ip_hash in claims_data[pet_id]["ip_hashes"]:
             return {
                 "status": "already_claimed",
@@ -645,19 +444,18 @@ async def claim_pet(request: Request):
                 "claims": len(claims_data[pet_id]["ip_hashes"]),
             }
 
-        # RULE 2: Count how many DIFFERENT pets this IP has claimed total
+        # Count how many DIFFERENT pets this IP has claimed
         total_pets_claimed_by_this_ip = 0
         for pet_data in claims_data.values():
             if isinstance(pet_data, dict) and ip_hash in pet_data.get("ip_hashes", []):
                 total_pets_claimed_by_this_ip += 1
 
-        # Check if user has reached limit of 10 different pets
         MAX_PETS_PER_USER = 10
 
         if total_pets_claimed_by_this_ip >= MAX_PETS_PER_USER:
             return {
                 "status": "limit_reached",
-                "message": f"You have already claimed {MAX_PETS_PER_USER} different pets (the maximum allowed). If you need assistance, please contact the shelter directly.",
+                "message": f"You have already claimed {MAX_PETS_PER_USER} different pets (the maximum allowed).",
                 "claims": len(claims_data[pet_id]["ip_hashes"]),
             }
 
@@ -670,19 +468,14 @@ async def claim_pet(request: Request):
         with open(claims_file, "w") as f:
             json.dump(claims_data, f, indent=2)
 
-        # Calculate new totals
         new_total_claimed = total_pets_claimed_by_this_ip + 1
         remaining = MAX_PETS_PER_USER - new_total_claimed
 
         print(f"✅ Claim recorded: Pet {pet_id}, IP hash {ip_hash}")
-        print(f"   This pet now has {claims_data[pet_id]['total']} unique claimers")
-        print(
-            f"   This user has claimed {new_total_claimed}/{MAX_PETS_PER_USER} different pets"
-        )
 
         return {
             "status": "success",
-            "message": "Claim recorded successfully! The shelter/finder will be notified.",
+            "message": "Claim recorded successfully!",
             "claims": claims_data[pet_id]["total"],
             "your_total_claims": new_total_claimed,
             "remaining_claims": remaining,
@@ -690,39 +483,22 @@ async def claim_pet(request: Request):
 
     except Exception as e:
         print(f"❌ Claim error: {e}")
-        import traceback
-
-        traceback.print_exc()
         return {"status": "error", "message": str(e)}
-
-
-@app.delete("/api/v1/pets/{pet_id}")
-def delete_pet(pet_id: str):
-    """
-    Delete a pet from the database
-
-    Args:
-        pet_id: The pet's unique identifier
-    """
-    try:
-        matcher.delete_pet(pet_id)
-        return {"status": "success", "message": f"Pet {pet_id} deleted successfully"}
-    except Exception as e:
-        return {"status": "error", "message": f"Failed to delete pet: {str(e)}"}
 
 
 @app.get("/api/v1/shelters")
 def get_shelters():
     """Get list of registered shelters"""
     try:
-        # Query all unique shelter IDs from registered pets
-        results = matcher.collection.query(
+        if not db.available:
+            return {"status": "error", "message": "Database offline", "shelters": []}
+
+        results = db.collection.query(
             expr="report_type == 'shelter_intake'",
             output_fields=["shelter_id"],
             limit=1000,
         )
 
-        # Get unique shelter names
         shelters = list(set([r["shelter_id"] for r in results if r.get("shelter_id")]))
         shelters.sort()
 

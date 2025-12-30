@@ -19,8 +19,9 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(to bottom, #fef5f1 0%, #fff 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 3vw, 20px);
             color: #2d2d2d;
+            font-size: clamp(14px, 2.5vw, 16px);
         }
 
         .container {
@@ -43,28 +44,29 @@
         }
 
         .paw-icon {
-            font-size: 60px;
+            font-size: clamp(40px, 8vw, 60px);
             line-height: 1;
         }
 
         h1 {
-            font-size: 48px;
+            font-size: clamp(32px, 6vw, 48px);
             font-weight: 700;
             color: #2d2d2d;
             letter-spacing: -1px;
         }
 
         .tagline {
-            font-size: 18px;
+            font-size: clamp(14px, 3vw, 18px);
             color: #666;
             font-weight: 400;
             margin-top: 10px;
+            padding: 0 10px;
         }
 
         .cards {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+            gap: clamp(20px, 4vw, 30px);
             margin-bottom: 40px;
         }
 
@@ -91,12 +93,13 @@
         .upload-area {
             border: 2px dashed #FF9F66;
             border-radius: 16px;
-            padding: 50px 30px;
+            padding: clamp(20px, 5vw, 50px) clamp(15px, 4vw, 30px);
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             margin-bottom: 25px;
             background: #fff9f5;
+            min-height: 120px;
         }
 
         .upload-area:hover {
@@ -122,7 +125,8 @@
 
         input[type="text"],
         input[type="number"],
-        textarea {
+        textarea,
+        select {
             width: 100%;
             padding: 14px 16px;
             margin-bottom: 16px;
@@ -135,7 +139,8 @@
         }
 
         input:focus,
-        textarea:focus {
+        textarea:focus,
+        select:focus {
             outline: none;
             border-color: #FF9F66;
             background: white;
@@ -153,6 +158,7 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 12px rgba(255, 159, 102, 0.3);
+            min-height: 48px;
         }
 
         button:hover {
@@ -285,23 +291,48 @@
             font-weight: 500;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1024px) {
             .cards {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 768px) {
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 36px;
+            body {
+                padding: 10px;
             }
 
             .card {
-                padding: 25px;
+                padding: 20px;
+            }
+
+            .upload-area {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            div:has(#shelterRoleBtn) {
+                flex-direction: column !important;
+            }
+
+            div:has(#shelterRoleBtn) button {
+                width: 100%;
+            }
+
+            div:has(input[name="holding_pet"]) {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+        }
+
+        @media (max-width: 375px) {
+            body {
+                padding: 8px;
+            }
+
+            .card {
+                padding: 15px;
             }
         }
 
@@ -334,36 +365,30 @@
                 font-size: 22px;
             }
 
-            /* Role selector buttons stack on mobile */
             #shelterRoleBtn,
             #finderRoleBtn {
                 font-size: 14px;
                 padding: 12px !important;
             }
 
-            /* Match cards stack image and content */
             .match-card-flex {
                 flex-direction: column !important;
             }
 
-            /* Buttons full width on mobile */
             button {
                 width: 100%;
                 padding: 14px !important;
             }
 
-            /* Stats responsive */
             .stats {
                 padding: 15px;
             }
 
-            /* Holding pet radio buttons stack */
             div:has(input[name="holding_pet"]) {
                 flex-direction: column !important;
             }
         }
 
-        /* Custom Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -430,7 +455,6 @@
             color: #555;
         }
 
-        /* Radio button hover effect */
         input[type="radio"]:checked+span {
             color: #4A90E2;
             font-weight: 600;
@@ -449,7 +473,6 @@
             border-color: #4A90E2;
         }
 
-        /* Paw Print Loading Animation */
         .paw-loader {
             display: inline-block;
             position: relative;
@@ -515,7 +538,6 @@
             }
         }
 
-        /* Image Zoom Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -548,7 +570,6 @@
             }
         }
 
-        /* Zoom cursor hint */
         .zoomable-image {
             cursor: pointer;
             transition: transform 0.2s ease;
@@ -558,7 +579,6 @@
             transform: scale(1.02);
         }
 
-        /* Claim Tooltip */
         @keyframes tooltipFadeIn {
             from {
                 opacity: 0;
@@ -602,7 +622,6 @@
             border-top: 6px solid #2d2d2d;
         }
 
-        /* Mobile Responsive Fix */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -622,17 +641,14 @@
                 padding: 20px 15px !important;
             }
 
-            /* Fix upload areas */
             .upload-area {
                 padding: 20px !important;
             }
 
-            /* Fix match results */
             #matchResults .match-card {
                 padding: 15px !important;
             }
 
-            /* Stack images vertically on mobile */
             #matchResults>div>div:first-child {
                 flex-direction: column !important;
             }
@@ -643,13 +659,11 @@
                 margin: 0 auto 15px auto !important;
             }
 
-            /* Make buttons full width on mobile */
             button {
                 width: 100% !important;
                 margin-top: 10px !important;
             }
 
-            /* Fix role selection buttons */
             .role-buttons {
                 flex-direction: column !important;
                 gap: 10px !important;
@@ -660,7 +674,6 @@
             }
         }
 
-        /* Extra small phones (iPhone SE) */
         @media (max-width: 375px) {
             body {
                 font-size: 14px;
@@ -688,14 +701,13 @@
                 <div class="paw-icon">🐾</div>
                 <h1>Sniff</h1>
             </div>
-            <p class="tagline">Reuniting pets with their families through compassionate technology</p>
+            <p class="tagline">Reuniting pets with their families</p>
         </header>
 
         <div class="cards">
 
             <!-- Card 1: Shelter + Good Samaritan Registration -->
-            <div
-                style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
+            <div class="card" style="margin-bottom: 30px;">
                 <h2 style="color: #2d2d2d; margin-bottom: 10px;">Register a Found Pet</h2>
                 <p style="color: #666; margin-bottom: 25px;">Help lost pets reunite with their families and return home
                 </p>
@@ -705,11 +717,11 @@
                     <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #2d2d2d;">I am
                         a:</label>
                     <div style="display: flex; gap: 15px;">
-                        <button id="shelterRoleBtn" onclick="selectRole('shelter')"
+                        <button id="shelterRoleBtn" type="button" onclick="selectRole('shelter')"
                             style="flex: 1; padding: 15px; border: 2px solid #4A90E2; background: #4A90E2; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
                             🏥 Shelter Hero
                         </button>
-                        <button id="finderRoleBtn" onclick="selectRole('finder')"
+                        <button id="finderRoleBtn" type="button" onclick="selectRole('finder')"
                             style="flex: 1; padding: 15px; border: 2px solid #e0e0e0; background: white; color: #666; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
                             🦸 Good Samaritan
                         </button>
@@ -852,7 +864,7 @@
                             <input type="text" id="locationFound" name="location_found"
                                 placeholder="e.g., Corner of Main St & 5th Ave"
                                 style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px;">
-                            <button type="button" onclick="getLocation()"
+                            <button type="button" onclick="getLocation(this)"
                                 style="width: 100%; padding: 12px; background: #4A90E2; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
                                 📍 Use My Current Location
                             </button>
@@ -949,19 +961,19 @@
                 </div>
 
                 <!-- Preview -->
-                <img id="matchPreview" class="preview" style="margin-bottom: 20px;">
+                <img id="matchPreview" class="preview" style="margin-bottom: 20px;" alt="Match preview">
 
-                <!-- Error Message -->
+                <!-- Error Message (single element) -->
                 <div id="matchError" class="error-message" style="display: none;"></div>
 
                 <!-- Results Container -->
                 <div id="matchResults" style="display: none; margin-top: 30px;"></div>
 
                 <!-- Search Button -->
-                <button id="matchBtn" onclick="matchPet()">Search for Matches</button>
+                <button id="matchBtn" type="button" onclick="matchPet()">Search for Matches</button>
 
                 <!-- Clear Button -->
-                <button onclick="clearMatchResults()" style="background: #6c757d; margin-top: 10px;">Clear</button>
+                <button type="button" onclick="clearMatchResults()" style="background: #6c757d; margin-top: 10px;">Clear</button>
 
                 <!-- Loading -->
                 <div id="matchLoading" style="display: none; text-align: center; padding: 40px;">
@@ -973,18 +985,14 @@
                     </div>
                     <p style="margin-top: 15px; color: #666; font-size: 16px;">Searching for matches...</p>
                 </div>
-
-                <div id="matchError" class="error-message" style="display: none;"></div>
-
             </div>
 
         </div>
-    </div>
 
-    <div class="stats">
-        <div class="stat-number" id="totalPets">-</div>
-        <div class="stat-label">Pets Registered</div>
-    </div>
+        <div class="stats">
+            <div class="stat-number" id="totalPets">-</div>
+            <div class="stat-label">Pets Registered</div>
+        </div>
     </div>
 
     <script>
@@ -1030,14 +1038,6 @@
             }
         }
 
-        // Match image upload with validation + preview
-        const matchInput = document.getElementById('matchFile');
-        if (matchInput) {
-            matchInput.addEventListener('change', function (e) {
-                handleFileChange(e, 'matchPreview', null, 'matchError', true);
-            });
-        }
-
         function handleFileChange(e, previewId, previewImgId, errorId, isDirectPreview = false) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1046,7 +1046,8 @@
             if (errors.length > 0) {
                 showError(errorId, errors.join('<br>'));
                 e.target.value = '';
-                document.getElementById(previewId).style.display = 'none';
+                const previewEl = document.getElementById(previewId);
+                if (previewEl) previewEl.style.display = 'none';
                 return;
             }
 
@@ -1057,14 +1058,19 @@
             reader.onload = function (readerEvent) {
                 if (isDirectPreview) {
                     const preview = document.getElementById(previewId);
-                    preview.src = readerEvent.target.result;
-                    preview.style.display = 'block';
-                    makeImageZoomable(preview);
+                    if (preview) {
+                        preview.src = readerEvent.target.result;
+                        preview.style.display = 'block';
+                        makeImageZoomable(preview);
+                    }
                 } else {
                     const img = document.getElementById(previewImgId);
-                    img.src = readerEvent.target.result;
-                    document.getElementById(previewId).style.display = 'block';
-                    makeImageZoomable(img);
+                    if (img) {
+                        img.src = readerEvent.target.result;
+                        const wrapper = document.getElementById(previewId);
+                        if (wrapper) wrapper.style.display = 'block';
+                        makeImageZoomable(img);
+                    }
                 }
             };
             reader.readAsDataURL(file);
@@ -1239,9 +1245,9 @@
 
         // ==================== GEOLOCATION ====================
 
-        async function getLocation() {
+        async function getLocation(buttonEl) {
             const input = document.getElementById('locationFound');
-            const button = event.target;
+            const button = buttonEl || { textContent: '', disabled: false };
 
             if (!navigator.geolocation) {
                 alert('Geolocation is not supported by your browser');
@@ -1354,16 +1360,21 @@
             event.preventDefault();
 
             const submitBtn = event.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+            }
 
-            const file = document.getElementById('registerImage').files[0];
+            const fileEl = document.getElementById('registerImage');
+            const file = fileEl ? fileEl.files[0] : null;
 
             // Validate file exists
             if (!file) {
                 showError('registerError', 'Please upload a pet photo');
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('loading');
+                }
                 return;
             }
 
@@ -1371,8 +1382,10 @@
             const errors = validateFile(file);
             if (errors.length > 0) {
                 showError('registerError', errors.join('<br>'));
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('loading');
+                }
                 return;
             }
 
@@ -1399,8 +1412,10 @@
                 const holdingPet = document.querySelector('input[name="holding_pet"]:checked');
                 if (!holdingPet) {
                     showError('registerError', 'Please select whether you are holding the pet');
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('loading');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                    }
                     return;
                 }
 
@@ -1439,7 +1454,8 @@
                     showSuccess('registerSuccess', message);
                     loadStats();
                     document.getElementById('registerForm').reset();
-                    document.getElementById('registerPreview').style.display = 'none';
+                    const previewEl = document.getElementById('registerPreview');
+                    if (previewEl) previewEl.style.display = 'none';
                 }
                 else {
                     showError('registerError', data.message || 'Registration failed');
@@ -1459,14 +1475,17 @@
                 showError('registerError', errorMessage);
             } finally {
                 showLoading('registerLoading', false);
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('loading');
+                }
             }
         }
 
         function clearRegisterForm() {
             document.getElementById('registerForm').reset();
-            document.getElementById('registerPreview').style.display = 'none';
+            const preview = document.getElementById('registerPreview');
+            if (preview) preview.style.display = 'none';
             hideMessage('registerSuccess');
             hideMessage('registerError');
         }
@@ -1475,7 +1494,8 @@
 
         async function matchPet() {
             const matchBtn = document.getElementById('matchBtn');
-            const file = document.getElementById('matchFile').files[0];
+            const fileEl = document.getElementById('matchFile');
+            const file = fileEl ? fileEl.files[0] : null;
 
             // Validate file
             const errors = validateFile(file);
@@ -1485,14 +1505,18 @@
             }
 
             // Hide previous results and errors
-            document.getElementById('matchResults').style.display = 'none';
+            const resultsEl = document.getElementById('matchResults');
+            if (resultsEl) resultsEl.style.display = 'none';
             hideMessage('matchError');
 
             // Show loading state
-            matchBtn.disabled = true;
-            matchBtn.classList.add('loading');
-            matchBtn.textContent = 'Searching...';
-            document.getElementById('matchLoading').style.display = 'block';
+            if (matchBtn) {
+                matchBtn.disabled = true;
+                matchBtn.classList.add('loading');
+                matchBtn.textContent = 'Searching...';
+            }
+            const matchLoading = document.getElementById('matchLoading');
+            if (matchLoading) matchLoading.style.display = 'block';
 
             const formData = new FormData();
             formData.append('image', file);
@@ -1521,10 +1545,13 @@
                 showError('matchError', '❌ Network error. Please check your connection and try again.');
             } finally {
                 // Always reset loading state
-                document.getElementById('matchLoading').style.display = 'none';
-                matchBtn.disabled = false;
-                matchBtn.classList.remove('loading');
-                matchBtn.textContent = 'Search for Matches';
+                const ml = document.getElementById('matchLoading');
+                if (ml) ml.style.display = 'none';
+                if (matchBtn) {
+                    matchBtn.disabled = false;
+                    matchBtn.classList.remove('loading');
+                    matchBtn.textContent = 'Search for Matches';
+                }
             }
         }
 
@@ -1558,50 +1585,46 @@
                 const confidence = (match.similarity_score * 100).toFixed(1);
                 const matchLevel = confidence > 90 ? 'Strong Match' : confidence > 82 ? 'Good Match' : confidence > 72 ? 'Possible Match' : 'Unlikely Match';
                 const badgeColor = confidence > 90 ? '#28a745' : confidence > 82 ? '#ffc107' : confidence > 72 ? '#ff9800' : '#9e9e9e';
-                const capitalizedSpecies = match.species.charAt(0).toUpperCase() + match.species.slice(1);
+                const capitalizedSpecies = (match.species || '').charAt(0).toUpperCase() + (match.species || '').slice(1);
                 const foundBy = match.report_type === 'shelter_intake' ? match.shelter_id : 'Good Samaritan';
 
-                // Claim level styling - based on UNIQUE claimers
                 const claims = match.claims || 0;
                 let claimBadge = '';
                 let claimColor = '';
                 let claimIcon = '';
                 let claimMessage = '';
                 let buttonText = 'Claim This Pet';
-                let buttonIcon = '';
 
                 if (claims === 0) {
-                    // No claims - don't show badge
                     claimBadge = '';
                     claimMessage = 'No one has claimed this pet yet';
                     buttonText = 'Claim This Pet';
-                    buttonIcon = '';
                 } else if (claims === 1) {
-                    claimColor = '#ffc107'; // Yellow
+                    claimColor = '#ffc107';
                     claimIcon = '⚠️';
                     claimBadge = `<span style="margin-left: 15px; color: ${claimColor}; font-weight: 600;">${claimIcon} ${claims} claimer</span>`;
                     claimMessage = 'One person has claimed this pet';
                     buttonText = '📋 View Details';
                 } else if (claims <= 3) {
-                    claimColor = '#ff9800'; // Orange
+                    claimColor = '#ff9800';
                     claimIcon = '⚠️';
                     claimBadge = `<span style="margin-left: 15px; color: ${claimColor}; font-weight: 700;">${claimIcon} ${claims} claimers</span>`;
                     claimMessage = `${claims} different people have claimed this pet`;
                     buttonText = '📋 View Details';
                 } else if (claims <= 5) {
-                    claimColor = '#f44336'; // Red
+                    claimColor = '#f44336';
                     claimIcon = '🚨';
                     claimBadge = `<span style="margin-left: 15px; color: ${claimColor}; font-weight: 700;">${claimIcon} ${claims} claimers</span>`;
                     claimMessage = `${claims} people have claimed this pet - verify carefully`;
                     buttonText = '📋 View Details';
                 } else if (claims < 10) {
-                    claimColor = '#d32f2f'; // Dark red
+                    claimColor = '#d32f2f';
                     claimIcon = '🚨';
                     claimBadge = `<span style="margin-left: 15px; color: ${claimColor}; font-weight: 900; font-size: 14px;">${claimIcon} ${claims} CLAIMERS</span>`;
                     claimMessage = `${claims} different people have claimed this pet - likely false matches or common appearance`;
                     buttonText = '📋 View Details';
                 } else {
-                    claimColor = '#b71c1c'; // Darkest red
+                    claimColor = '#b71c1c';
                     claimIcon = '🚫';
                     claimBadge = `<span style="margin-left: 15px; color: ${claimColor}; font-weight: 900; font-size: 14px; background: #ffebee; padding: 4px 8px; border-radius: 4px;">${claimIcon} ${claims} CLAIMERS</span>`;
                     claimMessage = 'Many claimers - contact finder/shelter directly';
@@ -1666,24 +1689,30 @@
         }
 
         function clearMatchResults() {
-            document.getElementById('matchResults').style.display = 'none';
-            document.getElementById('matchResults').innerHTML = '';
-            document.getElementById('matchFile').value = '';
-            document.getElementById('matchPreview').style.display = 'none';
+            const results = document.getElementById('matchResults');
+            if (results) {
+                results.style.display = 'none';
+                results.innerHTML = '';
+            }
+            const matchFile = document.getElementById('matchFile');
+            if (matchFile) matchFile.value = '';
+            const matchPreview = document.getElementById('matchPreview');
+            if (matchPreview) matchPreview.style.display = 'none';
 
             const matchBtn = document.getElementById('matchBtn');
-            matchBtn.disabled = false;
-            matchBtn.classList.remove('loading');
-            matchBtn.textContent = 'Search for Matches';
+            if (matchBtn) {
+                matchBtn.disabled = false;
+                matchBtn.classList.remove('loading');
+                matchBtn.textContent = 'Search for Matches';
+            }
         }
 
         // ==================== CLAIM HANDLING ====================
 
-        // Single event listener for claim buttons
         document.addEventListener('click', async function (e) {
             if (!e.target.classList.contains('claim-button')) return;
 
-            e.stopPropagation(); // Prevent duplicate triggers
+            e.stopPropagation();
 
             const petId = e.target.getAttribute('data-pet-id');
             const petName = e.target.getAttribute('data-pet-name');
@@ -1693,16 +1722,13 @@
             const location = e.target.getAttribute('data-location');
 
             try {
-                // Check if already claimed
                 const alreadyClaimed = await checkIfClaimed(petId);
 
                 if (alreadyClaimed) {
-                    // Show contact info directly
                     showClaimContactInfo(petName, finderName, finderContact, shelterInfo, location);
                     return;
                 }
 
-                // Show confirmation
                 const confirm = await showModal(
                     'Confirm Claim',
                     `Are you sure you want to claim <strong>${petName}</strong>?<br><br>This will record your claim and reveal the contact information.`,
@@ -1723,7 +1749,6 @@
 
         async function claimPet(petId, petName, finderName, finderContact, shelterInfo, location) {
             try {
-                // Call backend to record claim
                 const response = await fetch('/api/v1/claim', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1732,7 +1757,6 @@
 
                 const data = await response.json();
 
-                // Save to localStorage regardless of backend response
                 const localClaims = JSON.parse(localStorage.getItem('myClaims') || '[]');
                 if (!localClaims.includes(petId)) {
                     localClaims.push(petId);
@@ -1741,7 +1765,6 @@
                 }
 
                 if (data.status === 'success' || data.status === 'already_claimed') {
-                    // Build contact info message
                     let contactInfo = '';
                     let reportedBy = '';
 
@@ -1773,7 +1796,6 @@
                         [{ text: 'Got It!', value: true, primary: true }]
                     );
 
-                    // Refresh results
                     matchPet();
                 } else {
                     await showModal('Error', data.message || 'Claim failed', [{ text: 'OK', value: true }]);
@@ -1786,7 +1808,6 @@
         }
 
         async function checkIfClaimed(petId) {
-            // Use localStorage to track claims
             const localClaims = JSON.parse(localStorage.getItem('myClaims') || '[]');
             console.log('🔍 Checking if claimed...');
             console.log('Pet ID:', petId);
@@ -1825,7 +1846,7 @@
                 const response = await fetch('/api/v1/stats');
                 const data = await response.json();
 
-                console.log('📊 Stats loaded:', data); // DEBUG
+                console.log('📊 Stats loaded:', data);
 
                 const petCountEl = document.getElementById('totalPets');
                 if (petCountEl) {
@@ -1860,7 +1881,7 @@
             const el = document.getElementById(id);
             if (!el) {
                 console.error(`❌ Element '${id}' not found`);
-                alert(message); // Fallback
+                alert(message);
                 return;
             }
 
@@ -1869,11 +1890,9 @@
                 return;
             }
 
-            // Display error in styled box
             el.innerHTML = message;
             el.style.display = 'block';
 
-            // Ensure it's styled (in case CSS didn't apply)
             el.style.padding = '15px';
             el.style.marginTop = '15px';
             el.style.marginBottom = '15px';
@@ -1936,47 +1955,48 @@
         function makeImageZoomable(imgElement) {
             if (!imgElement) return;
 
+            if (imgElement.classList.contains('zoomable-image')) return;
             imgElement.classList.add('zoomable-image');
             imgElement.title = 'Click to zoom';
 
-            imgElement.onclick = function (e) {
+            imgElement.addEventListener('click', function (e) {
                 e.stopPropagation();
 
                 const overlay = document.createElement('div');
                 overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            cursor: zoom-out;
-            animation: fadeIn 0.2s ease-out;
-        `;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.9);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    cursor: zoom-out;
+                    animation: fadeIn 0.2s ease-out;
+                `;
 
                 const zoomedImg = document.createElement('img');
                 zoomedImg.src = this.src;
                 zoomedImg.style.cssText = `
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 8px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-            animation: zoomIn 0.3s ease-out;
-        `;
+                    max-width: 90%;
+                    max-height: 90%;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+                    animation: zoomIn 0.3s ease-out;
+                `;
 
                 const closeText = document.createElement('div');
                 closeText.textContent = 'Click anywhere to close';
                 closeText.style.cssText = `
-            position: absolute;
-            top: 20px;
-            color: white;
-            font-size: 14px;
-            opacity: 0.8;
-        `;
+                    position: absolute;
+                    top: 20px;
+                    color: white;
+                    font-size: 14px;
+                    opacity: 0.8;
+                `;
 
                 overlay.appendChild(zoomedImg);
                 overlay.appendChild(closeText);
@@ -1988,14 +2008,14 @@
                 };
 
                 // Close on Escape key
-                const escHandler = (e) => {
-                    if (e.key === 'Escape') {
+                const escHandler = (ev) => {
+                    if (ev.key === 'Escape') {
                         overlay.click();
                         document.removeEventListener('keydown', escHandler);
                     }
                 };
                 document.addEventListener('keydown', escHandler);
-            };
+            });
         }
 
         let activeTooltip = null;
@@ -2025,7 +2045,7 @@
                 tooltipContent += `<div style="margin-bottom: 6px;">Unique claimers: <strong style="color: #ff9800;">${claims} people</strong></div>`;
             }
 
-            // ONLY show additional context for high claim counts (6+)
+            // ONLY show additional context for high claim counts (3+)
             if (claims >= 3) {
                 tooltipContent += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #444; font-size: 11px; color: #ff9800;">⚠️ High claim count may indicate:</div>`;
                 tooltipContent += `<ul style="margin: 4px 0 0 0; padding-left: 20px; font-size: 11px; color: #ccc; white-space: normal;">`;
@@ -2060,42 +2080,34 @@
     </div>
 
     <!-- Footer -->
-    <footer
-        style="margin-top: 60px; padding: 40px 20px; background: #f8f9fa; border-top: 2px solid #e0e0e0; text-align: center;">
-        <div style="max-width: 800px; margin: 0 auto;">
-            <!-- Value Statement -->
-            <p style="font-size: 18px; font-weight: 600; color: #2d2d2d; margin-bottom: 20px;">
-                Sniff will now and forever remain free to use for all.
-            </p>
+<footer style="margin-top: 60px; padding: 40px 20px; background: #f8f9fa; border-top: 2px solid #e0e0e0; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <p style="font-size: 18px; font-weight: 600; color: #2d2d2d; margin-bottom: 20px;">
+            Sniff will now and forever remain free to use for all.
+        </p>
 
-            <!-- Divider -->
-            <div style="width: 60px; height: 2px; background: #ff6b35; margin: 20px auto;"></div>
+        <div style="width: 60px; height: 2px; background: #ff6b35; margin: 20px auto;"></div>
 
-            <!-- Coming Soon Links -->
-            <div style="margin-top: 30px; color: #666; font-size: 14px;">
-                <p style="margin-bottom: 15px; color: #999; font-style: italic;">*coming soon*</p>
-                <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px;">
-                    <a href="#" style="color: #666; text-decoration: none; transition: color 0.2s;"
-                        onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
-                        reddit
-                    </a>
-                    <a href="#" style="color: #666; text-decoration: none; transition: color 0.2s;"
-                        onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
-                        github repo
-                    </a>
-                    <a href="#" style="color: #666; text-decoration: none; transition: color 0.2s;"
-                        onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
-                        ways to help
-                    </a>
-                </div>
-            </div>
-
-            <!-- Copyright -->
-            <p style="color: #999; font-size: 12px; margin-top: 30px;">
-                © 2025 Sniff · built with ❤️ for the pets who love us, in honor of Henry
-            </p>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <a href="/ways-to-help" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                ways to help
+            </a>
+            <a href="/say-hi" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                say hi
+            </a>
+            <a href="#" style="color: #666; text-decoration: none; transition: color 0.2s; font-size: 14px;"
+                onmouseover="this.style.color='#ff6b35'" onmouseout="this.style.color='#666'">
+                reddit
+            </a>
         </div>
-    </footer>
+
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            © 2025 Sniff · built with ❤️ for the pets who love us, in honor of Henry
+        </p>
+    </div>
+</footer>
 
     <!-- Mobile Footer Adjustments -->
     <style>
