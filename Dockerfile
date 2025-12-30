@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+ARG CACHEBUST=20251230
+
 WORKDIR /app
 
 # Install system dependencies for OpenCV and ML (Debian compatible)
