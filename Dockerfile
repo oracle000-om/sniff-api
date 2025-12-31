@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libgomp1 \
     ffmpeg \
+    build-essential \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
