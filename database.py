@@ -29,7 +29,8 @@ class DBManager:
             if token:
                 # Remove https:// if present in host
                 clean_host = host.replace("https://", "").replace("http://", "")
-                uri = f"https://{clean_host}:{port}"
+                # Zilliz Serverless doesn't need port in URI
+                uri = f"https://{clean_host}"
                 connections.connect(alias="default", uri=uri, token=token)
                 print(f"🔗 Connecting to Zilliz Cloud: {uri}")
             # Local Milvus connection
